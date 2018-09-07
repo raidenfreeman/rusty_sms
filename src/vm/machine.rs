@@ -117,7 +117,7 @@ impl Machine {
             let register = selector(&mut self.cpu.state.registers);
             let value = *register;
             let result = operation(value);
-            std::mem::replace(register, result);
+            ::std::mem::replace(register, result);
             (result, value)
         };
         self.cpu.state.set_flag(Flag::Sign, result >= 0x80);
@@ -133,8 +133,8 @@ impl Machine {
             let address = self.next_word();
             let (low_val, high_val) = (self.ram.read_u8(address), self.ram.read_u8(address + 1));
             let (high_reg, low_reg) = selector(&mut self.cpu.state.registers);
-            std::mem::replace(high_reg, high_val);
-            std::mem::replace(low_reg, low_val);
+            ::std::mem::replace(high_reg, high_val);
+            ::std::mem::replace(low_reg, low_val);
         }
         self.clock(10);
     }
@@ -144,7 +144,7 @@ impl Machine {
             let address = self.next_word();
             let val = self.ram.read_u16(address);
             let reg = selector(&mut self.cpu.state);
-            std::mem::replace(reg, val);
+            ::std::mem::replace(reg, val);
         }
         self.clock(10);
     }

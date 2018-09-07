@@ -1,4 +1,3 @@
-#![feature(extern_prelude)]
 #![allow(dead_code)]
 
 mod vm;

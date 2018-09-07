@@ -29,5 +29,9 @@ pub enum Opcode {
 }
 
 impl From<u8> for Opcode {
-    fn from(value: u8) -> Self { unsafe { std::mem::transmute_copy::<u8, Opcode>(&value) } }
+    fn from(value: u8) -> Self {
+        unsafe {
+            ::std::mem::transmute_copy::<u8, Opcode>(&value)
+        }
+    }
 }
