@@ -72,6 +72,14 @@ impl Machine {
             Opcode::IncH        => { self.increment_register(|regs| { &mut regs.h }) },
             Opcode::IncL        => { self.increment_register(|regs| { &mut regs.l }) },
 
+            Opcode::AddA        => { self.add_register(|regs| { &mut regs.a }) },
+            Opcode::AddB        => { self.add_register(|regs| { &mut regs.b }) },
+            Opcode::AddC        => { self.add_register(|regs| { &mut regs.c }) },
+            Opcode::AddD        => { self.add_register(|regs| { &mut regs.d }) },
+            Opcode::AddE        => { self.add_register(|regs| { &mut regs.e }) },
+            Opcode::AddH        => { self.add_register(|regs| { &mut regs.h }) },
+            Opcode::AddL        => { self.add_register(|regs| { &mut regs.l }) },                                            
+
             Opcode::DecA        => { self.decrement_register(|regs| { &mut regs.a }) },
             Opcode::DecB        => { self.decrement_register(|regs| { &mut regs.b }) },
             Opcode::DecC        => { self.decrement_register(|regs| { &mut regs.c }) },
@@ -88,10 +96,68 @@ impl Machine {
             Opcode::LdVBCA      => { self.store_into_memory(|regs| { &regs.a }, |regs| { (&regs.b, &regs.c) } )}
             Opcode::LdVDEA      => { self.store_into_memory(|regs| { &regs.a }, |regs| { (&regs.d, &regs.e) } )}
 
-            Opcode::Halt        => { self.cpu.halt(); }
+            Opcode::Halt        => { self.cpu.halt(); },
 
             _                   => panic!()
         }
+    }
+
+    fn add_register(&mut self, selector: fn(&mut Registers) -> &mut u8) -> () {
+         let (accumulator, value, carry, overflow) = {
+            let register = *selector(&mut self.cpu.state.registers);
+            let accumulator = &mut self.cpu.state.registers.a;
+
+            let value = *accumulator + register;
+             let overflow = ((register < 0x80)&&(*accumulator < 0x80)&&(value>0x7F))||((register>0x7F)&&(*accumulator>0x7F)&&(value<0x80));
+             let carry = (*accumulator as u16) + (register as u16) > 0xFF;
+
+            *accumulator = value;
+
+             (*accumulator, value, carry, overflow)
+        };
+
+        self.cpu.state.set_flag(Flag::Sign, value >= 0x80);
+        self.cpu.state.set_flag(Flag::Zero, value == 0x00);
+        self.cpu.state.set_flag(Flag::HalfCarry, (value >= 0x10)&&(accumulator < 0x10) );
+        self.cpu.state.set_flag(Flag::AddSubtract, false);
+               
+        self.cpu.state.set_flag(Flag::ParityOverflow, overflow);
+        self.cpu.state.set_flag(Flag::Carry, carry);              
+    }
+
+    // fn logical_and(&mut self, selector: fn(&mut Registers)-> &mut u8, operation: fn(u8, u8) -> u8) -> () {
+    //     // get the data
+    //     let register =  selector(&mut self.cpu.state.registers);
+    //     let accumulator = &mut self.cpu.state.registers.a;
+    //     // 
+    //     let value = *accumulator & *register;
+    //     ::std::mem::replace(accumulator, value);
+    //     *accumulator = value;
+    //     // set flags
+    //     self.cpu.state.set_flag(Flag::Sign, value >= 0x80);
+    //     self.cpu.state.set_flag(Flag::Zero, value == 0x00);
+    //     self.cpu.state.set_flag(Flag::ParityOverflow, value > 0xFF);
+    //     self.cpu.state.set_flag(Flag::HalfCarry, (value >= 0x10)&&(*accumulator < 0x10) );
+    //     self.cpu.state.set_flag(Flag::AddSubtract, false);
+    //     // advance clock
+    //     self.clock(4);
+    // }
+
+    fn adjust_sign(&mut self, value: u8) -> () {
+        self.cpu.state.set_flag(Flag::Sign, value >= 0x80);
+    }
+    fn adjust_zero(&mut self, value: u8) -> () {
+        self.cpu.state.set_flag(Flag::Zero, value == 0x00);
+    }
+    fn adjust_parity(&mut self, value: u8) -> () {
+        panic!();
+        // self.cpu.state.set_flag(Flag::ParityOverflow, value == 0x00);
+    }
+    fn adjust_overflow(&mut self, value: u8) -> () {
+        self.cpu.state.set_flag(Flag::Sign, value == 0x00);
+    }
+    fn adjust_half_carry(&mut self, value: u8) -> () {
+        self.cpu.state.set_flag(Flag::Sign, value == 0x00);
     }
 
     fn increment_register(&mut self, selector: fn(&mut Registers) -> &mut u8) -> () {
@@ -104,9 +170,13 @@ impl Machine {
     fn decrement_register(&mut self, selector: fn(&mut Registers) -> &mut u8) -> () {
         self.operate_on_register(selector,
             |value| { value.wrapping_sub(1) }, 
-            |_, previous| { previous == 0x00 },
+            |_, previous| { previous == 0x80 },
             |result, previous| { (result & 0b0001_0000) > 0 && (previous & 0b0001_0000) == 0 });
     }
+
+    fn is_positive(value: u8) -> bool { value < 0x80 }
+    fn is_negative(value: u8) -> bool { value >= 0x80 }
+    fn is_zero(value: u8) -> bool { value == 0x00 }      
 
     fn operate_on_register(&mut self, 
             selector: fn(&mut Registers) -> &mut u8,
@@ -117,7 +187,7 @@ impl Machine {
             let register = selector(&mut self.cpu.state.registers);
             let value = *register;
             let result = operation(value);
-            ::std::mem::replace(register, result);
+            *register = result;
             (result, value)
         };
         self.cpu.state.set_flag(Flag::Sign, result >= 0x80);
