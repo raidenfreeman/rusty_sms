@@ -5,9 +5,6 @@ mod tests {
     use vm::opcodes::Opcode;
 
     #[test]
-    fn nothing() {}
-
-    #[test]
     fn load_simple_program() {
         let mut vm = Machine::new();
         let mut p = Program::new();
