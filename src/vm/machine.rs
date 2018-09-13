@@ -162,7 +162,7 @@ impl Machine {
     fn adjust_zero(&mut self, value: u8) -> () {
         self.cpu.state.set_flag(Flag::Zero, value == 0x00);
     }
-    fn adjust_parity(&mut self, value: u8) -> () {
+    fn adjust_parity(&mut self, _value: u8) -> () {
         panic!();
         // self.cpu.state.set_flag(Flag::ParityOverflow, value == 0x00);
     }
