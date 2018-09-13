@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
-mod vm;
 mod program;
 mod tests;
+mod vm;
 use vm::machine::Machine;
 
 fn main() {

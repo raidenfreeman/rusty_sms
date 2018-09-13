@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
+    use program::Program;
     use vm::machine::Machine;
     use vm::opcodes::Opcode;
-    use program::Program;
 
     #[test]
-    fn nothing() { }
+    fn nothing() {}
 
     #[test]
     fn load_simple_program() {

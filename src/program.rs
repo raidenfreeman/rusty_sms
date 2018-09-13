@@ -1,19 +1,19 @@
 use vm::opcodes::Opcode;
 
 pub struct Program {
-    bin: Vec<u8>
+    bin: Vec<u8>,
 }
 
 impl Program {
     pub fn new() -> Program {
-        Program {
-            bin: Vec::new()
-        }
+        Program { bin: Vec::new() }
     }
 
-    pub fn raw(&self) -> &Vec<u8> { &self.bin }
+    pub fn raw(&self) -> &Vec<u8> {
+        &self.bin
+    }
 
-    pub fn add(&mut self, opcode: Opcode) { 
+    pub fn add(&mut self, opcode: Opcode) {
         self.add_vector(opcode, Vec::new());
     }
 
@@ -33,5 +33,5 @@ impl Program {
     pub fn add_vector(&mut self, opcode: Opcode, mut parameters: Vec<u8>) {
         self.bin.push(opcode as u8);
         self.bin.append(&mut parameters);
-    }    
+    }
 }
