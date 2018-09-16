@@ -14,24 +14,21 @@ impl Program {
     }
 
     pub fn add(&mut self, opcode: Opcode) {
-        self.add_vector(opcode, Vec::new());
+        self.bin.push(opcode as u8);
     }
 
     pub fn add_param(&mut self, opcode: Opcode, parameter: u8) {
-        let mut params = Vec::new();
-        params.push(parameter);
-        self.add_vector(opcode, params);
+        self.bin.push(opcode as u8);
+        self.bin.push(parameter);
     }
 
     pub fn add_params(&mut self, opcode: Opcode, parameter_1: u8, parameter_2: u8) {
-        let mut params = Vec::new();
-        params.push(parameter_1);
-        params.push(parameter_2);
-        self.add_vector(opcode, params);
+        self.bin.push(opcode as u8);
+        self.bin.push(parameter_1);
+        self.bin.push(parameter_2);
     }
 
-    pub fn add_vector(&mut self, opcode: Opcode, mut parameters: Vec<u8>) {
-        self.bin.push(opcode as u8);
+    pub fn add_vector(&mut self, mut parameters: Vec<u8>) {
         self.bin.append(&mut parameters);
     }
 }

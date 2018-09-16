@@ -1,5 +1,7 @@
 use program::Program;
+use std::collections::HashMap;
 use vm::cpu::flags::Flag;
+use vm::cpu::operation::Operation;
 use vm::cpu::processor::Processor;
 use vm::cpu::registers::Registers;
 use vm::cpu::state::State;
@@ -65,10 +67,7 @@ impl Machine {
     fn execute(&mut self) -> () {
         let opcode = Opcode::from(self.next_byte());
         match opcode {
-            /* Examples */
-            Opcode::Nop => {
-                self.clock(4);
-            }
+            Opcode::Nop => self.clock(4),
 
             Opcode::IncA => self.increment_register(|regs| &mut regs.a),
             Opcode::IncB => self.increment_register(|regs| &mut regs.b),
@@ -112,30 +111,21 @@ impl Machine {
         }
     }
 
-    fn add_register(&mut self, selector: fn(&mut Registers) -> &mut u8) -> () {
-        let (accumulator, value, carry, overflow) = {
-            let register = *selector(&mut self.cpu.state.registers);
-            let accumulator = &mut self.cpu.state.registers.a;
-
-            let value = *accumulator + register;
-            let overflow = ((register < 0x80) && (*accumulator < 0x80) && (value > 0x7F))
-                || ((register > 0x7F) && (*accumulator > 0x7F) && (value < 0x80));
-            let carry = (*accumulator as u16) + (register as u16) > 0xFF;
-
-            *accumulator = value;
-
-            (*accumulator, value, carry, overflow)
-        };
-
-        self.cpu.state.set_flag(Flag::Sign, value >= 0x80);
-        self.cpu.state.set_flag(Flag::Zero, value == 0x00);
-        self.cpu
-            .state
-            .set_flag(Flag::HalfCarry, (value >= 0x10) && (accumulator < 0x10));
-        self.cpu.state.set_flag(Flag::AddSubtract, false);
-
-        self.cpu.state.set_flag(Flag::ParityOverflow, overflow);
-        self.cpu.state.set_flag(Flag::Carry, carry);
+    fn add_register(&mut self, selector: fn(&mut Registers) -> &mut u8) {
+        let operand = *selector(&mut self.cpu.state.registers);
+        self.operate_on_register(
+            Operation::Add,
+            |regs| &mut regs.a,
+            operand,
+            vec![
+                Flag::AddSubtract,
+                Flag::Carry,
+                Flag::HalfCarry,
+                Flag::ParityOverflow,
+                Flag::Sign,
+                Flag::Zero,
+            ],
+        );
     }
 
     // fn logical_and(&mut self, selector: fn(&mut Registers)-> &mut u8, operation: fn(u8, u8) -> u8) -> () {
@@ -156,75 +146,82 @@ impl Machine {
     //     self.clock(4);
     // }
 
-    fn adjust_sign(&mut self, value: u8) -> () {
-        self.cpu.state.set_flag(Flag::Sign, value >= 0x80);
-    }
-    fn adjust_zero(&mut self, value: u8) -> () {
-        self.cpu.state.set_flag(Flag::Zero, value == 0x00);
-    }
-    fn adjust_parity(&mut self, _value: u8) -> () {
-        panic!();
-        // self.cpu.state.set_flag(Flag::ParityOverflow, value == 0x00);
-    }
-    fn adjust_overflow(&mut self, value: u8) -> () {
-        self.cpu.state.set_flag(Flag::Sign, value == 0x00);
-    }
-    fn adjust_half_carry(&mut self, value: u8) -> () {
-        self.cpu.state.set_flag(Flag::Sign, value == 0x00);
-    }
-
-    fn increment_register(&mut self, selector: fn(&mut Registers) -> &mut u8) -> () {
+    fn increment_register(&mut self, target: fn(&mut Registers) -> &mut u8) -> () {
         self.operate_on_register(
-            selector,
-            |value| value.wrapping_add(1),
-            |_, previous| previous == 0x7F,
-            |result, previous| (result & 0b0001_0000) > 0 && (previous & 0b0001_0000) == 0,
+            Operation::Add,
+            target,
+            1,
+            vec![
+                Flag::AddSubtract,
+                Flag::ParityOverflow,
+                Flag::HalfCarry,
+                Flag::Zero,
+                Flag::Sign,
+            ],
         );
     }
 
-    fn decrement_register(&mut self, selector: fn(&mut Registers) -> &mut u8) -> () {
+    fn decrement_register(&mut self, target: fn(&mut Registers) -> &mut u8) -> () {
         self.operate_on_register(
-            selector,
-            |value| value.wrapping_sub(1),
-            |_, previous| previous == 0x80,
-            |result, previous| (result & 0b0001_0000) > 0 && (previous & 0b0001_0000) == 0,
-        );
-    }
-
-    fn is_positive(value: u8) -> bool {
-        value < 0x80
-    }
-    fn is_negative(value: u8) -> bool {
-        value >= 0x80
-    }
-    fn is_zero(value: u8) -> bool {
-        value == 0x00
+            Operation::Subtract,
+            target,
+            1,
+            vec![
+                Flag::AddSubtract,
+                Flag::ParityOverflow,
+                Flag::HalfCarry,
+                Flag::Zero,
+                Flag::Sign,
+            ],
+        )
     }
 
     fn operate_on_register(
         &mut self,
-        selector: fn(&mut Registers) -> &mut u8,
-        operation: fn(u8) -> u8,
-        parity_overflow_check: fn(u8, u8) -> bool,
-        half_carry_check: fn(u8, u8) -> bool,
-    ) -> () {
-        let (result, previous) = {
-            let register = selector(&mut self.cpu.state.registers);
-            let value = *register;
-            let result = operation(value);
-            *register = result;
-            (result, value)
+        operation: Operation,
+        target: fn(&mut Registers) -> &mut u8,
+        operand: u8,
+        affected_flags: Vec<Flag>,
+    ) {
+        let op1 = *target(&mut self.cpu.state.registers) as u16;
+        let op2 = if operation == Operation::Add {
+            operand
+        } else {
+            !operand + 1
+        } as u16;
+        let result16 = op1 + op2;
+        let result8 = (result16 & 0xFF) as u8;
+        let result4 = (op1 & 0xF) + (op2 & 0xF);
+        *target(&mut self.cpu.state.registers) = result8;
+
+        let subtraction = operation == Operation::Subtract;
+        let overflow = if op1 < 0x80 && op2 < 0x80 {
+            result16 > 0x7F
+        } else if op1 > 0x7F && op2 > 0x7F {
+            result16 < 0x80
+        } else {
+            false
         };
-        self.cpu.state.set_flag(Flag::Sign, result >= 0x80);
-        self.cpu.state.set_flag(Flag::Zero, result == 0x00);
-        self.cpu
-            .state
-            .set_flag(Flag::HalfCarry, half_carry_check(result, previous));
-        self.cpu.state.set_flag(
-            Flag::ParityOverflow,
-            parity_overflow_check(result, previous),
-        );
-        self.cpu.state.set_flag(Flag::AddSubtract, false);
+
+        let default_values: HashMap<Flag, bool> = [
+            (Flag::Zero, result8 == 0x00),
+            (Flag::Sign, result8 > 0x7F),
+            (Flag::HalfCarry, result4 > 0xF),
+            (Flag::ParityOverflow, overflow),
+            (Flag::AddSubtract, subtraction),
+            (Flag::Carry, result16 > 0xFF),
+        ].iter()
+            .cloned()
+            .collect();
+
+        for flag in affected_flags {
+            let status = &mut self.cpu.state.status;
+            match default_values.get(&flag) {
+                Some(value) => flag.set(status, *value),
+                None => {}
+            }
+        }
+
         self.clock(4);
     }
 
@@ -233,8 +230,8 @@ impl Machine {
             let address = self.next_word();
             let (low_val, high_val) = (self.ram.read_u8(address), self.ram.read_u8(address + 1));
             let (high_reg, low_reg) = selector(&mut self.cpu.state.registers);
-            ::std::mem::replace(high_reg, high_val);
-            ::std::mem::replace(low_reg, low_val);
+            *high_reg = high_val;
+            *low_reg = low_val;
         }
         self.clock(10);
     }
@@ -244,7 +241,7 @@ impl Machine {
             let address = self.next_word();
             let val = self.ram.read_u16(address);
             let reg = selector(&mut self.cpu.state);
-            ::std::mem::replace(reg, val);
+            *reg = val;
         }
         self.clock(10);
     }

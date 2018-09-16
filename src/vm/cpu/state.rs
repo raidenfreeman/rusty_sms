@@ -1,4 +1,3 @@
-use vm::cpu::flags::Flag;
 use vm::cpu::registers::Registers;
 
 pub struct State {
@@ -18,15 +17,5 @@ impl State {
             stack_pointer: 0,
             status: 0,
         }
-    }
-
-    pub fn set_flag(&mut self, flag: Flag, value: bool) -> () {
-        let binary_value = if value { 1 } else { 0 } as u8;
-        let mask = binary_value << (flag as u8);
-        if value {
-            self.status |= mask;
-        } else {
-            self.status &= !mask;
-        };
     }
 }
