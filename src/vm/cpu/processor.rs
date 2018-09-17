@@ -17,10 +17,10 @@ impl Processor {
     pub fn is_halted(&self) -> bool {
         self.halted
     }
-    pub fn halt(&mut self) -> () {
+    pub fn halt(&mut self) {
         self.halted = true;
     }
-    pub fn unhalt(&mut self) -> () {
+    pub fn unhalt(&mut self) {
         self.halted = false;
     }
 

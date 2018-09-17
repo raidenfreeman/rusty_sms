@@ -22,10 +22,7 @@ mod tests {
 
     #[test]
     fn increment() {
-        let mut vm = run_program(
-            |regs| regs.a = 0x7E,
-            vec![Opcode::IncA],
-        );
+        let mut vm = run_program(|regs| regs.a = 0x7E, vec![Opcode::IncA]);
         assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x7F);
         assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
         assert!(!Flag::Sign.get(&vm.cpu.state.status));
@@ -36,7 +33,7 @@ mod tests {
         assert!(Flag::ParityOverflow.get(&vm.cpu.state.status));
         assert!(Flag::Sign.get(&vm.cpu.state.status));
         assert!(!Flag::Carry.get(&vm.cpu.state.status));
-        
+
         vm.start_at(0);
         assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x81);
         assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
@@ -71,7 +68,7 @@ mod tests {
         assert!(Flag::ParityOverflow.get(&vm.cpu.state.status));
         assert!(Flag::Sign.get(&vm.cpu.state.status));
         assert!(!Flag::Carry.get(&vm.cpu.state.status));
-        
+
         vm.start_at(0);
         assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x81);
         assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));

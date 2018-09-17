@@ -21,7 +21,7 @@ impl Machine {
         }
     }
 
-    pub fn load_at(&mut self, program: &Program, start_address: u16) -> () {
+    pub fn load_at(&mut self, program: &Program, start_address: u16) {
         let mut address = start_address;
         for value in program.raw() {
             self.ram.write_u8(address, *value);
@@ -29,7 +29,7 @@ impl Machine {
         }
     }
 
-    pub fn load(&mut self, program: &Program) -> () {
+    pub fn load(&mut self, program: &Program) {
         self.load_at(program, 0)
     }
 
@@ -51,7 +51,7 @@ impl Machine {
         (high << 8) | low
     }
 
-    pub fn start_at(&mut self, address: u16) -> () {
+    pub fn start_at(&mut self, address: u16) {
         self.cpu.halt();
         self.cpu.goto(address);
         self.cpu.unhalt();
@@ -64,7 +64,7 @@ impl Machine {
         self.start_at(0);
     }
 
-    fn execute(&mut self) -> () {
+    fn execute(&mut self) {
         let opcode = Opcode::from(self.next_byte());
         match opcode {
             Opcode::Nop => self.clock(4),
@@ -126,6 +126,7 @@ impl Machine {
                 Flag::Zero,
             ],
         );
+        self.clock(4);
     }
 
     // fn logical_and(&mut self, selector: fn(&mut Registers)-> &mut u8, operation: fn(u8, u8) -> u8) -> () {
@@ -146,7 +147,7 @@ impl Machine {
     //     self.clock(4);
     // }
 
-    fn increment_register(&mut self, target: fn(&mut Registers) -> &mut u8) -> () {
+    fn increment_register(&mut self, target: fn(&mut Registers) -> &mut u8) {
         self.operate_on_register(
             Operation::Add,
             target,
@@ -162,7 +163,7 @@ impl Machine {
         self.clock(4);
     }
 
-    fn decrement_register(&mut self, target: fn(&mut Registers) -> &mut u8) -> () {
+    fn decrement_register(&mut self, target: fn(&mut Registers) -> &mut u8) {
         self.operate_on_register(
             Operation::Subtract,
             target,
@@ -257,7 +258,7 @@ impl Machine {
         self.ram.write_u8(address, value);
     }
 
-    pub fn clock(&mut self, _tstates: u8) -> () {
+    pub fn clock(&mut self, _tstates: u8) {
         // TODO: Something.
     }
 }
