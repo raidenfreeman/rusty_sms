@@ -2,30 +2,40 @@
 #[repr(u8)]
 pub enum Opcode {
     Nop = 0x00,
+
     LdBCXX = 0x01,
     LdVBCA = 0x02,
+
     IncBC = 0x03,
     IncB = 0x04,
     DecB = 0x05,
     IncC = 0x0c,
     DecC = 0x0d,
+
     LdDEXX = 0x11,
     LdVDEA = 0x12,
+
     IncD = 0x14,
     DecD = 0x15,
     IncE = 0x1c,
     DecE = 0x1d,
+
     LdHLXX = 0x21,
     LdVXXHL = 0x22,
+    
     IncH = 0x24,
     DecH = 0x25,
     IncL = 0x2c,
     DecL = 0x2d,
+
     LdSPXX = 0x31,
     LdVXXA = 0x32,
+    
     IncA = 0x3c,
     DecA = 0x3d,
+    
     Halt = 0x76,
+
     AddB = 0x80,
     AddC = 0x81,
     AddD = 0x82,
@@ -33,6 +43,7 @@ pub enum Opcode {
     AddH = 0x84,
     AddL = 0x85,
     AddA = 0x87,
+
     AdcB = 0x88,
     AdcC = 0x89,
     AdcD = 0x8A,
@@ -40,20 +51,23 @@ pub enum Opcode {
     AdcH = 0x8C,
     AdcL = 0x8D,
     AdcA = 0x8F,
+
     SubB = 0x90,
     SubC = 0x91,
     SubD = 0x92,
     SubE = 0x93,
     SubH = 0x94,
     SubL = 0x95,
-    SbcA = 0x97,
+    SubA = 0x97,
+
     SbcB = 0x98,
     SbcC = 0x99,
     SbcD = 0x9A,
     SbcE = 0x9B,
     SbcH = 0x9C,
-    AL = 0x9D,
+    SbcL = 0x9D,
     SbcA = 0x9F,    
+
     AndB = 0xA0,
     AndC = 0xA1,
     AndD = 0xA2,
@@ -61,6 +75,7 @@ pub enum Opcode {
     AndH = 0xA4,
     AndL = 0xA5,
     AndA = 0xA7,
+
     XorB = 0xA8,
     XorC = 0xA9,
     XorD = 0xAA,
@@ -68,6 +83,7 @@ pub enum Opcode {
     XorH = 0xAC,
     XorL = 0xAD,
     XorA = 0xAF,
+
     OrB = 0xB0,
     OrC = 0xB1,
     OrD = 0xB2,
@@ -76,6 +92,7 @@ pub enum Opcode {
     OrL = 0xB5,
     OrHL = 0xB6,
     OrA = 0xB7,
+
     CpB = 0xB8,
     CpC = 0xB9,
     CpD = 0xBA,
@@ -84,6 +101,7 @@ pub enum Opcode {
     CpL = 0xBD,
     CpHL = 0xBE,
     CpA = 0xBF,
+
     RetNZ = 0xC0,
     PopBC = 0xC1,
     JpNZXX = 0xC2,
