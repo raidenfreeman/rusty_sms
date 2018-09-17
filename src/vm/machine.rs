@@ -93,6 +93,22 @@ impl Machine {
             Opcode::AdcH => self.add_carry_register(|regs| &mut regs.h),
             Opcode::AdcL => self.add_carry_register(|regs| &mut regs.l),
 
+            Opcode::SubA => self.subtract_register(|regs| &mut regs.a),
+            Opcode::SubB => self.subtract_register(|regs| &mut regs.b),
+            Opcode::SubC => self.subtract_register(|regs| &mut regs.c),
+            Opcode::SubD => self.subtract_register(|regs| &mut regs.d),
+            Opcode::SubE => self.subtract_register(|regs| &mut regs.e),
+            Opcode::SubH => self.subtract_register(|regs| &mut regs.h),
+            Opcode::SubL => self.subtract_register(|regs| &mut regs.l),
+
+            Opcode::SbcA => self.subtract_carry_register(|regs| &mut regs.a),
+            Opcode::SbcB => self.subtract_carry_register(|regs| &mut regs.b),
+            Opcode::SbcC => self.subtract_carry_register(|regs| &mut regs.c),
+            Opcode::SbcD => self.subtract_carry_register(|regs| &mut regs.d),
+            Opcode::SbcE => self.subtract_carry_register(|regs| &mut regs.e),
+            Opcode::SbcH => self.subtract_carry_register(|regs| &mut regs.h),
+            Opcode::SbcL => self.subtract_carry_register(|regs| &mut regs.l),
+
             Opcode::AndA => self.and_register(|regs| regs.a),
             Opcode::AndB => self.and_register(|regs| regs.b),
             Opcode::AndC => self.and_register(|regs| regs.c),
@@ -164,6 +180,43 @@ impl Machine {
         let carry = if Flag::Carry.get(&self.cpu.state.status) { 1 } else { 0 }; 
         self.operate_on_register(
             Operation::Add,
+            |regs| &mut regs.a,
+            operand + carry,
+            vec![
+                Flag::AddSubtract,
+                Flag::Carry,
+                Flag::HalfCarry,
+                Flag::ParityOverflow,
+                Flag::Sign,
+                Flag::Zero,
+            ],
+        );
+        self.clock(4);
+    }
+
+    fn subtract_register(&mut self, selector: fn(&mut Registers) -> &mut u8) {
+        let operand = *selector(&mut self.cpu.state.registers);
+        self.operate_on_register(
+            Operation::Subtract,
+            |regs| &mut regs.a,
+            operand,
+            vec![
+                Flag::AddSubtract,
+                Flag::Carry,
+                Flag::HalfCarry,
+                Flag::ParityOverflow,
+                Flag::Sign,
+                Flag::Zero,
+            ],
+        );
+        self.clock(4);
+    }
+
+    fn subtract_carry_register(&mut self, selector: fn(&mut Registers) -> &mut u8) {
+        let operand = *selector(&mut self.cpu.state.registers);
+        let carry = if Flag::Carry.get(&self.cpu.state.status) { 1 } else { 0 }; 
+        self.operate_on_register(
+            Operation::Subtract,
             |regs| &mut regs.a,
             operand + carry,
             vec![
