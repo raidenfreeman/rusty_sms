@@ -252,13 +252,12 @@ impl Machine {
     }
 
     fn and_register(&mut self, selector: fn(&Registers) -> &u8) {
-        let operand = *selector(&self.cpu.state.registers);
-        self.bitwise_operation(operand, |a, b| a & b, true);
+        self.bitwise_operation(selector, |a, b| a & b, true);
     }
 
-    fn bitwise_operation(&mut self, operand: u8, operation: fn(u8, u8) -> u8, half_carry_value: bool) {
+    fn bitwise_operation(&mut self, operand: fn(&Registers) -> &u8, operation: fn(u8, u8) -> u8, half_carry_value: bool) {
         let op1 = self.cpu.state.registers.a;
-        let op2 = operand;
+        let op2 = *operand(&self.cpu.state.registers);
         let result = operation(op1, op2);
         let parity = (0..8).fold(0, |acc, b| { acc + (result >> b) & 1 }) % 2 == 0;
 
