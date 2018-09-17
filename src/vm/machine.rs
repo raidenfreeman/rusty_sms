@@ -1,5 +1,6 @@
 use program::Program;
 use std::collections::HashMap;
+use std::mem;
 use vm::cpu::flags::Flag;
 use vm::cpu::operation::Operation;
 use vm::cpu::processor::Processor;
@@ -152,6 +153,7 @@ impl Machine {
             Opcode::XorE => self.xor_register(|regs| regs.e),
             Opcode::XorH => self.xor_register(|regs| regs.h),
             Opcode::XorL => self.xor_register(|regs| regs.l),
+            Opcode::Exx => self.exchange_registers(),
 
             _ => panic!(),
         }
@@ -177,7 +179,11 @@ impl Machine {
 
     fn add_carry_register(&mut self, selector: fn(&mut Registers) -> &mut u8) {
         let operand = *selector(&mut self.cpu.state.registers);
-        let carry = if Flag::Carry.get(&self.cpu.state.status) { 1 } else { 0 }; 
+        let carry = if Flag::Carry.get(&self.cpu.state.status) {
+            1
+        } else {
+            0
+        };
         self.operate_on_register(
             Operation::Add,
             |regs| &mut regs.a,
@@ -214,7 +220,11 @@ impl Machine {
 
     fn subtract_carry_register(&mut self, selector: fn(&mut Registers) -> &mut u8) {
         let operand = *selector(&mut self.cpu.state.registers);
-        let carry = if Flag::Carry.get(&self.cpu.state.status) { 1 } else { 0 }; 
+        let carry = if Flag::Carry.get(&self.cpu.state.status) {
+            1
+        } else {
+            0
+        };
         self.operate_on_register(
             Operation::Subtract,
             |regs| &mut regs.a,
@@ -231,24 +241,11 @@ impl Machine {
         self.clock(4);
     }
 
-    // fn logical_and(&mut self, selector: fn(&mut Registers)-> &mut u8, operation: fn(u8, u8) -> u8) -> () {
-    //     // get the data
-    //     let register =  selector(&mut self.cpu.state.registers);
-    //     let accumulator = &mut self.cpu.state.registers.a;
-    //     //
-    //     let value = *accumulator & *register;
-    //     ::std::mem::replace(accumulator, value);
-    //     *accumulator = value;
-    //     // set flags
-    //     self.cpu.state.set_flag(Flag::Sign, value >= 0x80);
-    //     self.cpu.state.set_flag(Flag::Zero, value == 0x00);
-    //     self.cpu.state.set_flag(Flag::ParityOverflow, value > 0xFF);
-    //     self.cpu.state.set_flag(Flag::HalfCarry, (value >= 0x10)&&(*accumulator < 0x10) );
-    //     self.cpu.state.set_flag(Flag::AddSubtract, false);
-    //     // advance clock
-    //     self.clock(4);
-    // }
-
+    /// Performs INC r where r is a register
+    ///
+    /// # Arguments
+    ///
+    /// * `target` - A function that returns a reference to a register
     fn increment_register(&mut self, target: fn(&mut Registers) -> &mut u8) {
         self.operate_on_register(
             Operation::Add,
@@ -330,21 +327,36 @@ impl Machine {
 
     fn and_register(&mut self, selector: fn(&Registers) -> u8) {
         self.bitwise_operation(selector, |a, b| a & b, true);
+        self.clock(4);
     }
 
     fn or_register(&mut self, selector: fn(&Registers) -> u8) {
         self.bitwise_operation(selector, |a, b| a | b, false);
+        self.clock(4);
     }
 
     fn xor_register(&mut self, selector: fn(&Registers) -> u8) {
         self.bitwise_operation(selector, |a, b| a ^ b, false);
+        self.clock(4);
     }
 
-    fn bitwise_operation(&mut self, operand: fn(&Registers) -> u8, operation: fn(u8, u8) -> u8, half_carry_value: bool) {
+    /// Performs a bitwise operation, like AND, OR, etc, between an operand and the ACC
+    ///
+    /// # Arguments
+    ///
+    /// * `operand` - The target register
+    /// * `operation` - A function to be applied to the operand and the accumulator
+    /// * `half_carry_value` - True if you want the half carry to be set to 1, false to set it to 0
+    fn bitwise_operation(
+        &mut self,
+        operand: fn(&Registers) -> u8,
+        operation: fn(u8, u8) -> u8,
+        half_carry_value: bool,
+    ) {
         let op1 = self.cpu.state.registers.a;
         let op2 = operand(&self.cpu.state.registers);
         let result = operation(op1, op2);
-        let parity = (0..8).fold(0, |acc, b| { acc + (result >> b) & 1 }) % 2 == 0;
+        let parity = (0..8).fold(0, |acc, b| acc + (result >> b) & 1) % 2 == 0;
 
         let status = &mut self.cpu.state.status;
         Flag::ParityOverflow.set(status, parity);
@@ -385,6 +397,20 @@ impl Machine {
         let (high_reg, low_reg) = pointer(&self.cpu.state.registers);
         let address = ((*high_reg as u16) << 8) | (*low_reg as u16);
         self.ram.write_u8(address, value);
+    }
+
+    fn exchange_registers(&mut self) {
+        {
+            let reg = &mut self.cpu.state.registers;
+            let alt = &mut self.cpu.state.alt_registers;
+            mem::swap(&mut reg.b, &mut alt.b);
+            mem::swap(&mut reg.c, &mut alt.c);
+            mem::swap(&mut reg.d, &mut alt.d);
+            mem::swap(&mut reg.e, &mut alt.e);
+            mem::swap(&mut reg.h, &mut alt.h);
+            mem::swap(&mut reg.l, &mut alt.l);
+        }
+        self.clock(4);
     }
 
     pub fn clock(&mut self, _tstates: u8) {
