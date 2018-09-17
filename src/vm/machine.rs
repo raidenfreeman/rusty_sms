@@ -103,9 +103,7 @@ impl Machine {
             Opcode::LdVBCA => self.store_into_memory(|regs| &regs.a, |regs| (&regs.b, &regs.c)),
             Opcode::LdVDEA => self.store_into_memory(|regs| &regs.a, |regs| (&regs.d, &regs.e)),
 
-            Opcode::Halt => {
-                self.cpu.halt();
-            }
+            Opcode::Halt => self.cpu.halt(),
 
             _ => panic!(),
         }
