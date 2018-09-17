@@ -21,37 +21,68 @@ mod tests {
     }
 
     #[test]
-    fn increment_without_overflow() {
-        let vm = run_program(|regs| regs.a = 0x7E, vec![Opcode::IncA, Opcode::Halt]);
+    fn increment() {
+        let mut vm = run_program(
+            |regs| regs.a = 0x7E,
+            vec![Opcode::IncA],
+        );
+        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x7F);
+        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
+        assert!(!Flag::Sign.get(&vm.cpu.state.status));
+        assert!(!Flag::Carry.get(&vm.cpu.state.status));
 
-        let a = vm.cpu.get_register(|regs| regs.a);
-        assert_eq!(a, 0x7F);
+        vm.start_at(0);
+        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x80);
+        assert!(Flag::ParityOverflow.get(&vm.cpu.state.status));
+        assert!(Flag::Sign.get(&vm.cpu.state.status));
+        assert!(!Flag::Carry.get(&vm.cpu.state.status));
+        
+        vm.start_at(0);
+        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x81);
+        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
+        assert!(Flag::Sign.get(&vm.cpu.state.status));
+        assert!(!Flag::Carry.get(&vm.cpu.state.status));
+
+        vm.cpu.state.registers.a = 0xFF;
+        vm.start_at(0);
+        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x00);
+        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
+        assert!(!Flag::Sign.get(&vm.cpu.state.status));
+        assert!(!Flag::Carry.get(&vm.cpu.state.status));
     }
 
     #[test]
-    fn increment_with_overflow() {
-        let vm = run_program(|regs| regs.a = 0x7F, vec![Opcode::IncA, Opcode::Halt]);
+    fn add() {
+        let mut vm = run_program(
+            |regs| {
+                regs.a = 0x7E;
+                regs.b = 0x01;
+            },
+            vec![Opcode::AddB],
+        );
 
-        let overflow = Flag::ParityOverflow.get(&vm.cpu.state.status);
-        assert_eq!(overflow, true);
-    }
+        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x7F);
+        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
+        assert!(!Flag::Sign.get(&vm.cpu.state.status));
+        assert!(!Flag::Carry.get(&vm.cpu.state.status));
 
-    #[test]
-    fn add_without_overflow() {
-        let vm = run_program(|regs| { regs.a = 0x7E; regs.b = 0x01; }, vec![Opcode::AddB]);
+        vm.start_at(0);
+        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x80);
+        assert!(Flag::ParityOverflow.get(&vm.cpu.state.status));
+        assert!(Flag::Sign.get(&vm.cpu.state.status));
+        assert!(!Flag::Carry.get(&vm.cpu.state.status));
+        
+        vm.start_at(0);
+        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x81);
+        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
+        assert!(Flag::Sign.get(&vm.cpu.state.status));
+        assert!(!Flag::Carry.get(&vm.cpu.state.status));
 
-        let a = vm.cpu.get_register(|regs| regs.a);
-        assert_eq!(a, 0x7F);               
-    }
-
-    #[test]
-    fn add_with_overflow() {
-        let vm = run_program(|regs| { regs.a = 0x7E; regs.b = 0x02; }, vec![Opcode::AddB]);
-
-        let a = vm.cpu.get_register(|regs| regs.a);
-        assert_eq!(a, 0x80);
-
-        let overflow = Flag::ParityOverflow.get(&vm.cpu.state.status);
-        assert_eq!(overflow, true);               
+        vm.cpu.state.registers.a = 0xFF;
+        vm.start_at(0);
+        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x00);
+        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
+        assert!(!Flag::Sign.get(&vm.cpu.state.status));
+        assert!(Flag::Carry.get(&vm.cpu.state.status));
     }
 }
