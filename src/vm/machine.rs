@@ -226,7 +226,7 @@ impl Machine {
         }
     }
 
-    fn bitwise_operation(&mut self, operand: u8, operation: fn(u8, u8) -> u8) {
+    fn bitwise_operation(&mut self, operand: u8, operation: fn(u8, u8) -> u8, half_carry_value: bool) {
         let op1 = self.cpu.state.registers.a;
         let op2 = operand;
         let result = operation(op1, op2);
@@ -235,7 +235,7 @@ impl Machine {
         let status = &mut self.cpu.state.status;
         Flag::ParityOverflow.set(status, parity);
         Flag::Carry.set(status, false);
-        Flag::HalfCarry.set(status, false);
+        Flag::HalfCarry.set(status, half_carry_value);
         Flag::AddSubtract.set(status, false);
         Flag::Zero.set(status, result == 0x00);
         Flag::Sign.set(status, result > 0x7F);
