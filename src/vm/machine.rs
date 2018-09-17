@@ -159,6 +159,7 @@ impl Machine {
                 Flag::Sign,
             ],
         );
+        self.clock(4);
     }
 
     fn decrement_register(&mut self, target: fn(&mut Registers) -> &mut u8) -> () {
@@ -173,7 +174,8 @@ impl Machine {
                 Flag::Zero,
                 Flag::Sign,
             ],
-        )
+        );
+        self.clock(4);
     }
 
     fn operate_on_register(
@@ -221,8 +223,6 @@ impl Machine {
                 None => {}
             }
         }
-
-        self.clock(4);
     }
 
     fn load_into_register(&mut self, selector: fn(&mut Registers) -> (&mut u8, &mut u8)) {
