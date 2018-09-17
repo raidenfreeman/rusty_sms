@@ -93,6 +93,14 @@ impl Machine {
             Opcode::AdcH => self.add_carry_register(|regs| &mut regs.h),
             Opcode::AdcL => self.add_carry_register(|regs| &mut regs.l),
 
+            Opcode::AndA => self.and_register(|regs| regs.a),
+            Opcode::AndB => self.and_register(|regs| regs.b),
+            Opcode::AndC => self.and_register(|regs| regs.c),
+            Opcode::AndD => self.and_register(|regs| regs.d),
+            Opcode::AndE => self.and_register(|regs| regs.e),
+            Opcode::AndH => self.and_register(|regs| regs.h),
+            Opcode::AndL => self.and_register(|regs| regs.l),
+
             Opcode::DecA => self.decrement_register(|regs| &mut regs.a),
             Opcode::DecB => self.decrement_register(|regs| &mut regs.b),
             Opcode::DecC => self.decrement_register(|regs| &mut regs.c),
@@ -100,6 +108,8 @@ impl Machine {
             Opcode::DecE => self.decrement_register(|regs| &mut regs.e),
             Opcode::DecH => self.decrement_register(|regs| &mut regs.h),
             Opcode::DecL => self.decrement_register(|regs| &mut regs.l),
+
+            Opcode::Halt => self.cpu.halt(),
 
             Opcode::LdBCXX => self.load_into_register(|regs| (&mut regs.b, &mut regs.c)),
             Opcode::LdDEXX => self.load_into_register(|regs| (&mut regs.d, &mut regs.e)),
@@ -111,7 +121,21 @@ impl Machine {
             Opcode::LdVBCA => self.store_into_memory(|regs| &regs.a, |regs| (&regs.b, &regs.c)),
             Opcode::LdVDEA => self.store_into_memory(|regs| &regs.a, |regs| (&regs.d, &regs.e)),
 
-            Opcode::Halt => self.cpu.halt(),
+            Opcode::OrA => self.or_register(|regs| regs.a),
+            Opcode::OrB => self.or_register(|regs| regs.b),
+            Opcode::OrC => self.or_register(|regs| regs.c),
+            Opcode::OrD => self.or_register(|regs| regs.d),
+            Opcode::OrE => self.or_register(|regs| regs.e),
+            Opcode::OrH => self.or_register(|regs| regs.h),
+            Opcode::OrL => self.or_register(|regs| regs.l),
+
+            Opcode::XorA => self.xor_register(|regs| regs.a),
+            Opcode::XorB => self.xor_register(|regs| regs.b),
+            Opcode::XorC => self.xor_register(|regs| regs.c),
+            Opcode::XorD => self.xor_register(|regs| regs.d),
+            Opcode::XorE => self.xor_register(|regs| regs.e),
+            Opcode::XorH => self.xor_register(|regs| regs.h),
+            Opcode::XorL => self.xor_register(|regs| regs.l),
 
             _ => panic!(),
         }
@@ -251,21 +275,21 @@ impl Machine {
         }
     }
 
-    fn and_register(&mut self, selector: fn(&Registers) -> &u8) {
+    fn and_register(&mut self, selector: fn(&Registers) -> u8) {
         self.bitwise_operation(selector, |a, b| a & b, true);
     }
 
-    fn or_register(&mut self, selector: fn(&Registers) -> &u8) {
+    fn or_register(&mut self, selector: fn(&Registers) -> u8) {
         self.bitwise_operation(selector, |a, b| a | b, false);
     }
 
-    fn xor_register(&mut self, selector: fn(&Registers) -> &u8) {
+    fn xor_register(&mut self, selector: fn(&Registers) -> u8) {
         self.bitwise_operation(selector, |a, b| a ^ b, false);
     }
 
-    fn bitwise_operation(&mut self, operand: fn(&Registers) -> &u8, operation: fn(u8, u8) -> u8, half_carry_value: bool) {
+    fn bitwise_operation(&mut self, operand: fn(&Registers) -> u8, operation: fn(u8, u8) -> u8, half_carry_value: bool) {
         let op1 = self.cpu.state.registers.a;
-        let op2 = *operand(&self.cpu.state.registers);
+        let op2 = operand(&self.cpu.state.registers);
         let result = operation(op1, op2);
         let parity = (0..8).fold(0, |acc, b| { acc + (result >> b) & 1 }) % 2 == 0;
 
