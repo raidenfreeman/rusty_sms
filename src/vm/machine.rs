@@ -255,6 +255,14 @@ impl Machine {
         self.bitwise_operation(selector, |a, b| a & b, true);
     }
 
+    fn or_register(&mut self, selector: fn(&Registers) -> &u8) {
+        self.bitwise_operation(selector, |a, b| a | b, false);
+    }
+
+    fn xor_register(&mut self, selector: fn(&Registers) -> &u8) {
+        self.bitwise_operation(selector, |a, b| a ^ b, false);
+    }
+
     fn bitwise_operation(&mut self, operand: fn(&Registers) -> &u8, operation: fn(u8, u8) -> u8, half_carry_value: bool) {
         let op1 = self.cpu.state.registers.a;
         let op2 = *operand(&self.cpu.state.registers);
