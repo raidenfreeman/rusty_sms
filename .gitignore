@@ -2,3 +2,4 @@
 **/*.rs.bk
 .ignored/
 .vscode/
+*.sms
