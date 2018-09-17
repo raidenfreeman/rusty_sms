@@ -33,6 +33,13 @@ pub enum Opcode {
     AddH = 0x84,
     AddL = 0x85,
     AddA = 0x87,
+    AdcB = 0x88,
+    AdcC = 0x89,
+    AdcD = 0x8A,
+    AdcE = 0x8B,
+    AdcH = 0x8C,
+    AdcL = 0x8D,
+    AdcA = 0x8F,
 }
 
 impl From<u8> for Opcode {

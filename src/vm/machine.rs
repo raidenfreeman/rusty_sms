@@ -85,6 +85,14 @@ impl Machine {
             Opcode::AddH => self.add_register(|regs| &mut regs.h),
             Opcode::AddL => self.add_register(|regs| &mut regs.l),
 
+            Opcode::AdcA => self.add_carry_register(|regs| &mut regs.a),
+            Opcode::AdcB => self.add_carry_register(|regs| &mut regs.b),
+            Opcode::AdcC => self.add_carry_register(|regs| &mut regs.c),
+            Opcode::AdcD => self.add_carry_register(|regs| &mut regs.d),
+            Opcode::AdcE => self.add_carry_register(|regs| &mut regs.e),
+            Opcode::AdcH => self.add_carry_register(|regs| &mut regs.h),
+            Opcode::AdcL => self.add_carry_register(|regs| &mut regs.l),
+
             Opcode::DecA => self.decrement_register(|regs| &mut regs.a),
             Opcode::DecB => self.decrement_register(|regs| &mut regs.b),
             Opcode::DecC => self.decrement_register(|regs| &mut regs.c),
@@ -115,6 +123,25 @@ impl Machine {
             Operation::Add,
             |regs| &mut regs.a,
             operand,
+            vec![
+                Flag::AddSubtract,
+                Flag::Carry,
+                Flag::HalfCarry,
+                Flag::ParityOverflow,
+                Flag::Sign,
+                Flag::Zero,
+            ],
+        );
+        self.clock(4);
+    }
+
+    fn add_carry_register(&mut self, selector: fn(&mut Registers) -> &mut u8) {
+        let operand = *selector(&mut self.cpu.state.registers);
+        let carry = if Flag::Carry.get(&self.cpu.state.status) { 1 } else { 0 }; 
+        self.operate_on_register(
+            Operation::Add,
+            |regs| &mut regs.a,
+            operand + carry,
             vec![
                 Flag::AddSubtract,
                 Flag::Carry,
@@ -222,6 +249,11 @@ impl Machine {
                 None => {}
             }
         }
+    }
+
+    fn and_register(&mut self, selector: fn(&Registers) -> &u8) {
+        let operand = *selector(&self.cpu.state.registers);
+        self.bitwise_operation(operand, |a, b| a & b, true);
     }
 
     fn bitwise_operation(&mut self, operand: u8, operation: fn(u8, u8) -> u8, half_carry_value: bool) {
