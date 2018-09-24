@@ -153,6 +153,7 @@ impl Machine {
             Opcode::XorE => self.xor_register(|regs| regs.e),
             Opcode::XorH => self.xor_register(|regs| regs.h),
             Opcode::XorL => self.xor_register(|regs| regs.l),
+
             Opcode::Exx => self.exchange_registers(),
 
             _ => panic!(),
