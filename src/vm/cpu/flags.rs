@@ -22,7 +22,10 @@ impl Flag {
     }
 
     pub fn get(self, register: &u8) -> bool {
-        let mask = self as u8;
-        *register & mask > 0
+        self.get_bit(register) > 0
     }
+
+    pub fn get_bit(self, register: &u8) -> u8 {
+        let mask = self as u8;
+        *register & mask
 }
