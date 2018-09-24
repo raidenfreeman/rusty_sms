@@ -1,9 +1,14 @@
+use std::collections::HashMap;
+use std::mem;
+use vm::cpu::flags::Flag;
+use vm::cpu::operation::Operation;
+use vm::cpu::registers::Registers;
+use vm::cpu::state::State;
 use vm::machine::Machine;
 use vm::opcodes::Opcode;
-ues vm::cpu::flags::Flag;
 
 impl Machine {
-    fn execute(&mut self) {
+    pub fn execute(&mut self) {
         let opcode = Opcode::from(self.next_byte());
         match opcode {
             Opcode::Nop => self.clock(4),
@@ -115,7 +120,7 @@ impl Machine {
         let high = self.next_byte() as u16;
         (high << 8) | low
     }
-    
+
     fn add_register(&mut self, selector: fn(&Registers) -> u8) {
         let operand = selector(&self.cpu.state.registers);
         self.operate_on_register(

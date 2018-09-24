@@ -1,11 +1,5 @@
 use program::Program;
-use std::collections::HashMap;
-use std::mem;
-use vm::cpu::flags::Flag;
-use vm::cpu::operation::Operation;
 use vm::cpu::processor::Processor;
-use vm::cpu::registers::Registers;
-use vm::cpu::state::State;
 use vm::ram::memory::Memory;
 
 pub struct Machine {
