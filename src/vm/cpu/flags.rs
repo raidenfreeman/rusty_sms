@@ -28,4 +28,5 @@ impl Flag {
     pub fn get_bit(self, register: &u8) -> u8 {
         let mask = self as u8;
         *register & mask
+    }
 }
