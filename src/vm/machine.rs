@@ -312,7 +312,8 @@ impl Machine {
             (Flag::ParityOverflow, overflow),
             (Flag::AddSubtract, subtraction),
             (Flag::Carry, result16 > 0xFF),
-        ].iter()
+        ]
+            .iter()
             .cloned()
             .collect();
 

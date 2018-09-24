@@ -22,7 +22,7 @@ pub enum Opcode {
 
     LdHLXX = 0x21,
     LdVXXHL = 0x22,
-    
+
     IncH = 0x24,
     DecH = 0x25,
     IncL = 0x2c,
@@ -30,10 +30,10 @@ pub enum Opcode {
 
     LdSPXX = 0x31,
     LdVXXA = 0x32,
-    
+
     IncA = 0x3c,
     DecA = 0x3d,
-    
+
     Halt = 0x76,
 
     AddB = 0x80,
@@ -66,7 +66,7 @@ pub enum Opcode {
     SbcE = 0x9B,
     SbcH = 0x9C,
     SbcL = 0x9D,
-    SbcA = 0x9F,    
+    SbcA = 0x9F,
 
     AndB = 0xA0,
     AndC = 0xA1,
@@ -165,7 +165,7 @@ pub enum Opcode {
     CallMXX = 0xFC,
     IY = 0xFD,
     CpX = 0xFE,
-    Rst38h = 0xFF,        
+    Rst38h = 0xFF,
 }
 
 impl From<u8> for Opcode {
