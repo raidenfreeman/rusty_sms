@@ -102,13 +102,13 @@ impl Machine {
             Opcode::SubH => self.subtract_register(|regs| regs.h),
             Opcode::SubL => self.subtract_register(|regs| regs.l),
 
-            Opcode::SbcA => self.subtract_carry_register(|regs| &mut regs.a),
-            Opcode::SbcB => self.subtract_carry_register(|regs| &mut regs.b),
-            Opcode::SbcC => self.subtract_carry_register(|regs| &mut regs.c),
-            Opcode::SbcD => self.subtract_carry_register(|regs| &mut regs.d),
-            Opcode::SbcE => self.subtract_carry_register(|regs| &mut regs.e),
-            Opcode::SbcH => self.subtract_carry_register(|regs| &mut regs.h),
-            Opcode::SbcL => self.subtract_carry_register(|regs| &mut regs.l),
+            Opcode::SbcA => self.subtract_carry_register(|regs| regs.a),
+            Opcode::SbcB => self.subtract_carry_register(|regs| regs.b),
+            Opcode::SbcC => self.subtract_carry_register(|regs| regs.c),
+            Opcode::SbcD => self.subtract_carry_register(|regs| regs.d),
+            Opcode::SbcE => self.subtract_carry_register(|regs| regs.e),
+            Opcode::SbcH => self.subtract_carry_register(|regs| regs.h),
+            Opcode::SbcL => self.subtract_carry_register(|regs| regs.l),
 
             Opcode::AndA => self.and_register(|regs| regs.a),
             Opcode::AndB => self.and_register(|regs| regs.b),
@@ -216,7 +216,7 @@ impl Machine {
 
     fn subtract_carry_register(&mut self, selector: fn(&Registers) -> u8) {
         let operand = selector(&self.cpu.state.registers);
-        let carry = if Flag::Carry.get_bit(&self.cpu.state.status);
+        let carry = Flag::Carry.get_bit(&self.cpu.state.status);
         self.operate_on_register(
             Operation::Subtract,
             |regs| &mut regs.a,
