@@ -78,29 +78,29 @@ impl Machine {
             Opcode::IncH => self.increment_register(|regs| &mut regs.h),
             Opcode::IncL => self.increment_register(|regs| &mut regs.l),
 
-            Opcode::AddA => self.add_register(|regs| &mut regs.a),
-            Opcode::AddB => self.add_register(|regs| &mut regs.b),
-            Opcode::AddC => self.add_register(|regs| &mut regs.c),
-            Opcode::AddD => self.add_register(|regs| &mut regs.d),
-            Opcode::AddE => self.add_register(|regs| &mut regs.e),
-            Opcode::AddH => self.add_register(|regs| &mut regs.h),
-            Opcode::AddL => self.add_register(|regs| &mut regs.l),
+            Opcode::AddA => self.add_register(|regs| regs.a),
+            Opcode::AddB => self.add_register(|regs| regs.b),
+            Opcode::AddC => self.add_register(|regs| regs.c),
+            Opcode::AddD => self.add_register(|regs| regs.d),
+            Opcode::AddE => self.add_register(|regs| regs.e),
+            Opcode::AddH => self.add_register(|regs| regs.h),
+            Opcode::AddL => self.add_register(|regs| regs.l),
 
-            Opcode::AdcA => self.add_carry_register(|regs| &mut regs.a),
-            Opcode::AdcB => self.add_carry_register(|regs| &mut regs.b),
-            Opcode::AdcC => self.add_carry_register(|regs| &mut regs.c),
-            Opcode::AdcD => self.add_carry_register(|regs| &mut regs.d),
-            Opcode::AdcE => self.add_carry_register(|regs| &mut regs.e),
-            Opcode::AdcH => self.add_carry_register(|regs| &mut regs.h),
-            Opcode::AdcL => self.add_carry_register(|regs| &mut regs.l),
+            Opcode::AdcA => self.add_carry_register(|regs| regs.a),
+            Opcode::AdcB => self.add_carry_register(|regs| regs.b),
+            Opcode::AdcC => self.add_carry_register(|regs| regs.c),
+            Opcode::AdcD => self.add_carry_register(|regs| regs.d),
+            Opcode::AdcE => self.add_carry_register(|regs| regs.e),
+            Opcode::AdcH => self.add_carry_register(|regs| regs.h),
+            Opcode::AdcL => self.add_carry_register(|regs| regs.l),
 
-            Opcode::SubA => self.subtract_register(|regs| &mut regs.a),
-            Opcode::SubB => self.subtract_register(|regs| &mut regs.b),
-            Opcode::SubC => self.subtract_register(|regs| &mut regs.c),
-            Opcode::SubD => self.subtract_register(|regs| &mut regs.d),
-            Opcode::SubE => self.subtract_register(|regs| &mut regs.e),
-            Opcode::SubH => self.subtract_register(|regs| &mut regs.h),
-            Opcode::SubL => self.subtract_register(|regs| &mut regs.l),
+            Opcode::SubA => self.subtract_register(|regs| regs.a),
+            Opcode::SubB => self.subtract_register(|regs| regs.b),
+            Opcode::SubC => self.subtract_register(|regs| regs.c),
+            Opcode::SubD => self.subtract_register(|regs| regs.d),
+            Opcode::SubE => self.subtract_register(|regs| regs.e),
+            Opcode::SubH => self.subtract_register(|regs| regs.h),
+            Opcode::SubL => self.subtract_register(|regs| regs.l),
 
             Opcode::SbcA => self.subtract_carry_register(|regs| &mut regs.a),
             Opcode::SbcB => self.subtract_carry_register(|regs| &mut regs.b),
@@ -159,8 +159,8 @@ impl Machine {
         }
     }
 
-    fn add_register(&mut self, selector: fn(&mut Registers) -> &mut u8) {
-        let operand = *selector(&mut self.cpu.state.registers);
+    fn add_register(&mut self, selector: fn(&Registers) -> u8) {
+        let operand = selector(&self.cpu.state.registers);
         self.operate_on_register(
             Operation::Add,
             |regs| &mut regs.a,
@@ -177,13 +177,9 @@ impl Machine {
         self.clock(4);
     }
 
-    fn add_carry_register(&mut self, selector: fn(&mut Registers) -> &mut u8) {
-        let operand = *selector(&mut self.cpu.state.registers);
-        let carry = if Flag::Carry.get(&self.cpu.state.status) {
-            1
-        } else {
-            0
-        };
+    fn add_carry_register(&mut self, selector: fn(&Registers) -> u8) {
+        let operand = selector(&self.cpu.state.registers);
+        let carry = Flag::Carry.get_bit(&self.cpu.state.status);
         self.operate_on_register(
             Operation::Add,
             |regs| &mut regs.a,
@@ -200,8 +196,8 @@ impl Machine {
         self.clock(4);
     }
 
-    fn subtract_register(&mut self, selector: fn(&mut Registers) -> &mut u8) {
-        let operand = *selector(&mut self.cpu.state.registers);
+    fn subtract_register(&mut self, selector: fn(&Registers) -> u8) {
+        let operand = selector(&self.cpu.state.registers);
         self.operate_on_register(
             Operation::Subtract,
             |regs| &mut regs.a,
@@ -218,13 +214,9 @@ impl Machine {
         self.clock(4);
     }
 
-    fn subtract_carry_register(&mut self, selector: fn(&mut Registers) -> &mut u8) {
-        let operand = *selector(&mut self.cpu.state.registers);
-        let carry = if Flag::Carry.get(&self.cpu.state.status) {
-            1
-        } else {
-            0
-        };
+    fn subtract_carry_register(&mut self, selector: fn(&Registers) -> u8) {
+        let operand = selector(&self.cpu.state.registers);
+        let carry = if Flag::Carry.get_bit(&self.cpu.state.status);
         self.operate_on_register(
             Operation::Subtract,
             |regs| &mut regs.a,
