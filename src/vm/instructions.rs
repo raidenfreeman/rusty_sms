@@ -323,9 +323,9 @@ impl Machine {
     }
 
     fn load_into_register(&mut self, selector: fn(&mut Registers) -> (&mut u8, &mut u8)) {
+        let address = self.next_word();
+        let (low_val, high_val) = (self.ram.read_u8(address), self.ram.read_u8(address + 1));
         {
-            let address = self.next_word();
-            let (low_val, high_val) = (self.ram.read_u8(address), self.ram.read_u8(address + 1));
             let (high_reg, low_reg) = selector(&mut self.cpu.state.registers);
             *high_reg = high_val;
             *low_reg = low_val;
