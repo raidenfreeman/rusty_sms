@@ -334,9 +334,9 @@ impl Machine {
     }
 
     fn load_into_double_register(&mut self, selector: fn(&mut State) -> &mut u16) {
+        let address = self.next_word();
+        let val = self.ram.read_u16(address);
         {
-            let address = self.next_word();
-            let val = self.ram.read_u16(address);
             let reg = selector(&mut self.cpu.state);
             *reg = val;
         }
