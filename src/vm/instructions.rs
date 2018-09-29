@@ -78,8 +78,8 @@ impl Machine {
                 self.load_into_double_register(|state: &mut State| &mut state.stack_pointer)
             }
 
-            Opcode::LdVBCA => self.store_into_memory(|regs| &regs.a, |regs| (&regs.b, &regs.c)),
-            Opcode::LdVDEA => self.store_into_memory(|regs| &regs.a, |regs| (&regs.d, &regs.e)),
+            Opcode::LdVBCA => self.load_into_memory(|regs| &regs.a, |regs| (&regs.b, &regs.c)),
+            Opcode::LdVDEA => self.load_into_memory(|regs| &regs.a, |regs| (&regs.d, &regs.e)),
 
             Opcode::OrA => self.or_register(|regs| regs.a),
             Opcode::OrB => self.or_register(|regs| regs.b),
@@ -343,7 +343,7 @@ impl Machine {
         self.clock(10);
     }
 
-    fn store_into_memory(
+    fn load_into_memory(
         &mut self,
         source: fn(&Registers) -> &u8,
         pointer: fn(&Registers) -> (&u8, &u8),
