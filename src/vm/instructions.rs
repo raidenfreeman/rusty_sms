@@ -21,6 +21,11 @@ impl Machine {
             Opcode::IncH => self.increment_register(|regs| &mut regs.h),
             Opcode::IncL => self.increment_register(|regs| &mut regs.l),
 
+			Opcode::IncBC => self.increment_register_wide(|regs| &mut regs.b, |regs| &mut regs.c),
+			Opcode::IncDE => self.increment_register_wide(|regs| &mut regs.d, |regs| &mut regs.e),
+			Opcode::IncHL => self.increment_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
+			//Opcode::IncSP => self.increment_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
+
             Opcode::AddA => self.add_register(|regs| regs.a),
             Opcode::AddB => self.add_register(|regs| regs.b),
             Opcode::AddC => self.add_register(|regs| regs.c),
@@ -68,6 +73,11 @@ impl Machine {
             Opcode::DecE => self.decrement_register(|regs| &mut regs.e),
             Opcode::DecH => self.decrement_register(|regs| &mut regs.h),
             Opcode::DecL => self.decrement_register(|regs| &mut regs.l),
+
+			Opcode::DecBC => self.decrement_register_wide(|regs| &mut regs.b, |regs| &mut regs.c),
+			Opcode::DecDE => self.decrement_register_wide(|regs| &mut regs.d, |regs| &mut regs.e),
+			Opcode::DecHL => self.decrement_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
+			//Opcode::DecSP => self.decrement_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
 
             Opcode::Halt => self.cpu.halt(),
 
@@ -216,6 +226,20 @@ impl Machine {
         self.clock(4);
     }
 
+	fn increment_register_wide(&mut self, target_first: fn(&mut Registers) -> &mut u8, target_second: fn(&mut Registers) -> &mut u8) {
+		let op1 = *target_first(&mut self.cpu.state.registers) as u16;
+		let op2 = *target_second(&mut self.cpu.state.registers) as u16;
+
+		let inc = ((op1 << 0x08) | op2) + 0x01;
+		let result_left = (inc >> 0x08) as u8;
+		let result_right = inc as u8;
+
+		*target_first(&mut self.cpu.state.registers) = result_left;
+		*target_second(&mut self.cpu.state.registers) = result_right;
+
+		self.clock(6);
+	}
+
     fn decrement_register(&mut self, target: fn(&mut Registers) -> &mut u8) {
         self.operate_on_register(
             Operation::Subtract,
@@ -231,6 +255,20 @@ impl Machine {
         );
         self.clock(4);
     }
+
+	fn decrement_register_wide(&mut self, target_first: fn(&mut Registers) -> &mut u8, target_second: fn(&mut Registers) -> &mut u8) {
+		let op1 = *target_first(&mut self.cpu.state.registers) as u16;
+		let op2 = *target_second(&mut self.cpu.state.registers) as u16;
+
+		let inc = ((op1 << 0x08) | op2) - 0x01;
+		let result_left = (inc >> 0x08) as u8;
+		let result_right = inc as u8;
+
+		*target_first(&mut self.cpu.state.registers) = result_left;
+		*target_second(&mut self.cpu.state.registers) = result_right;
+
+		self.clock(6);
+	}
 
     fn operate_on_register(
         &mut self,
