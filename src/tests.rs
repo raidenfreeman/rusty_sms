@@ -82,4 +82,38 @@ mod tests {
         assert!(!Flag::Sign.get(&vm.cpu.state.status));
         assert!(Flag::Carry.get(&vm.cpu.state.status));
     }
+
+    #[test]
+    fn increment_wide() {
+        let mut vm = run_program(
+            |regs| {
+                regs.b = 0x00;
+                regs.c = 0xFE;
+            },
+            vec![Opcode::IncBC, Opcode::Halt],
+        );
+        assert_eq!(vm.cpu.get_register(|regs| regs.b), 0x00);
+        assert_eq!(vm.cpu.get_register(|regs| regs.c), 0xFF);
+
+        vm.start_at(0);
+        assert_eq!(vm.cpu.get_register(|regs| regs.b), 0x01);
+        assert_eq!(vm.cpu.get_register(|regs| regs.c), 0x00);
+    }
+
+    #[test]
+    fn decrement_wide() {
+        let mut vm = run_program(
+            |regs| {
+                regs.b = 0x01;
+                regs.c = 0x00;
+            },
+            vec![Opcode::DecBC, Opcode::Halt],
+        );
+        assert_eq!(vm.cpu.get_register(|regs| regs.b), 0x00);
+        assert_eq!(vm.cpu.get_register(|regs| regs.c), 0xFF);
+
+        vm.start_at(0);
+        assert_eq!(vm.cpu.get_register(|regs| regs.b), 0x00);
+        assert_eq!(vm.cpu.get_register(|regs| regs.c), 0xFE);
+    }
 }
