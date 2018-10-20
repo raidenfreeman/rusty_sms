@@ -26,6 +26,16 @@ impl Machine {
             Opcode::IncHL => self.increment_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
             //Opcode::IncSP => self.increment_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
 
+            Opcode::JpXX => self.jump(|_| true),
+            Opcode::JpNZXX => self.jump(|status| !Flag::Zero.get(status)),
+            Opcode::JpZXX => self.jump(|status| Flag::Zero.get(status)),
+            Opcode::JpNCXX => self.jump(|status| !Flag::Carry.get(status)),
+            Opcode::JpCXX => self.jump(|status| Flag::Carry.get(status)),
+            Opcode::JpPOXX => self.jump(|status| Flag::ParityOverflow.get(status)),
+            Opcode::JpPEXX => self.jump(|status| !Flag::ParityOverflow.get(status)),
+            Opcode::JpPXX => self.jump(|status| !Flag::Sign.get(status)),
+            Opcode::JpMXX => self.jump(|status| Flag::Sign.get(status)),
+
             Opcode::AddA => self.add_register(|regs| regs.a),
             Opcode::AddB => self.add_register(|regs| regs.b),
             Opcode::AddC => self.add_register(|regs| regs.c),
@@ -276,6 +286,19 @@ impl Machine {
         *target_second(&mut self.cpu.state.registers) = result_right;
 
         self.clock(6);
+    }
+
+    fn jump(
+        &mut self, 
+        predicate: fn(&mut u8) -> bool
+    ) {
+        let dest = self.next_word();
+
+        if predicate(&mut self.cpu.state.status) {
+            self.cpu.goto(dest);
+        }
+        
+        self.clock(10);
     }
 
     fn operate_on_register(

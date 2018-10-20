@@ -143,7 +143,7 @@ pub enum Opcode {
     Rst18h = 0xDF,
     RetPO = 0xE0,
     PopHL = 0xE1,
-    JpPoXX = 0xE2,
+    JpPOXX = 0xE2,
     ExSPHL = 0xE3,
     CallPoXX = 0xE4,
     PushHL = 0xE5,
