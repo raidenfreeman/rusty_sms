@@ -88,6 +88,7 @@ impl Machine {
             Opcode::DecDE => self.decrement_register_wide(|regs| &mut regs.d, |regs| &mut regs.e),
             Opcode::DecHL => self.decrement_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
             Opcode::DecSP => self.decrement_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
+
             Opcode::Halt => self.cpu.halt(),
 
             Opcode::LdBCXX => self.load_into_register(|regs| (&mut regs.b, &mut regs.c)),
