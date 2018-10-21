@@ -1,0 +1,2 @@
+# Force LF line endings, because of an RLS issue: https://github.com/rust-lang-nursery/rls/issues/1096
+* text eol=lf
