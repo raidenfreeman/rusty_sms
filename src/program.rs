@@ -22,6 +22,14 @@ impl Program {
         self.bin.push(parameter);
     }
 
+    pub fn add_param_word(&mut self, opcode: Opcode, parameter: u16) {
+        let low = parameter as u8;
+        let high = (parameter >> 0x08) as u8;
+        self.bin.push(opcode as u8);
+        self.bin.push(low);
+        self.bin.push(high);
+    }
+
     pub fn add_params(&mut self, opcode: Opcode, parameter_1: u8, parameter_2: u8) {
         self.bin.push(opcode as u8);
         self.bin.push(parameter_1);
