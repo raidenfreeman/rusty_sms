@@ -24,8 +24,7 @@ impl Machine {
             Opcode::IncBC => self.increment_register_wide(|regs| &mut regs.b, |regs| &mut regs.c),
             Opcode::IncDE => self.increment_register_wide(|regs| &mut regs.d, |regs| &mut regs.e),
             Opcode::IncHL => self.increment_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
-            //Opcode::IncSP => self.increment_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
-
+            Opcode::IncSP => self.increment_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
             Opcode::JpXX => self.jump(|_| true),
             Opcode::JpNZXX => self.jump(|status| !Flag::Zero.get(status)),
             Opcode::JpZXX => self.jump(|status| Flag::Zero.get(status)),
@@ -87,16 +86,13 @@ impl Machine {
             Opcode::DecBC => self.decrement_register_wide(|regs| &mut regs.b, |regs| &mut regs.c),
             Opcode::DecDE => self.decrement_register_wide(|regs| &mut regs.d, |regs| &mut regs.e),
             Opcode::DecHL => self.decrement_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
-            //Opcode::DecSP => self.decrement_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
-            
+            Opcode::DecSP => self.decrement_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
             Opcode::Halt => self.cpu.halt(),
 
             Opcode::LdBCXX => self.load_into_register(|regs| (&mut regs.b, &mut regs.c)),
             Opcode::LdDEXX => self.load_into_register(|regs| (&mut regs.d, &mut regs.e)),
             Opcode::LdHLXX => self.load_into_register(|regs| (&mut regs.h, &mut regs.l)),
-            Opcode::LdSPXX => {
-                self.load_into_double_register(|state: &mut State| &mut state.stack_pointer)
-            }
+            Opcode::LdSPXX => self.load_into_register(|regs| (&mut regs.s, &mut regs.p)),
 
             Opcode::LdVBCA => self.load_into_memory(|regs| &regs.a, |regs| (&regs.b, &regs.c)),
             Opcode::LdVDEA => self.load_into_memory(|regs| &regs.a, |regs| (&regs.d, &regs.e)),
@@ -288,16 +284,13 @@ impl Machine {
         self.clock(6);
     }
 
-    fn jump(
-        &mut self, 
-        predicate: fn(&mut u8) -> bool
-    ) {
+    fn jump(&mut self, predicate: fn(&mut u8) -> bool) {
         let dest = self.next_word();
 
         if predicate(&mut self.cpu.state.status) {
             self.cpu.goto(dest);
         }
-        
+
         self.clock(10);
     }
 
