@@ -25,6 +25,7 @@ impl Machine {
             Opcode::IncDE => self.increment_register_wide(|regs| &mut regs.d, |regs| &mut regs.e),
             Opcode::IncHL => self.increment_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
             Opcode::IncSP => self.increment_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
+
             Opcode::JpXX => self.jump(|_| true),
             Opcode::JpNZXX => self.jump(|status| !Flag::Zero.get(status)),
             Opcode::JpZXX => self.jump(|status| Flag::Zero.get(status)),
