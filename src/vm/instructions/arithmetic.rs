@@ -147,7 +147,7 @@ impl Machine {
         self.clock(6);
     }
 
-    pub(crate) fn operate_on_register(
+    fn operate_on_register(
         &mut self,
         operation: Operation,
         target: fn(&mut Registers) -> &mut u8,

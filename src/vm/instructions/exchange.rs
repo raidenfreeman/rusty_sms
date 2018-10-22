@@ -3,22 +3,6 @@ use vm::cpu::registers::Registers;
 use vm::machine::Machine;
 
 impl Machine {
-    pub(crate) fn exchange(&mut self, selectors: Vec<fn(&mut Registers) -> (&mut u8, &mut u8)>) {
-        let reg = &mut self.cpu.state.registers;
-        for s in selectors {
-            let (r1, r2) = s(reg);
-            mem::swap(r1, r2);
-        }
-    }
-
-    pub(crate) fn exchange_with_shadow(&mut self, selectors: Vec<fn(&mut Registers) -> &mut u8>) {
-        let reg = &mut self.cpu.state.registers;
-        let alt = &mut self.cpu.state.alt_registers;
-        for s in selectors {
-            mem::swap(s(reg), s(alt));
-        }
-    }
-
     pub(crate) fn shadow_exchange_af(&mut self) {
         self.exchange_with_shadow(vec![|regs| &mut regs.a, |regs| &mut regs.f]);
         self.clock(4);
@@ -53,5 +37,21 @@ impl Machine {
             self.ram.write_u8(high_address, reg.h);
         }
         self.clock(19);
+    }
+
+    fn exchange(&mut self, selectors: Vec<fn(&mut Registers) -> (&mut u8, &mut u8)>) {
+        let reg = &mut self.cpu.state.registers;
+        for s in selectors {
+            let (r1, r2) = s(reg);
+            mem::swap(r1, r2);
+        }
+    }
+
+    fn exchange_with_shadow(&mut self, selectors: Vec<fn(&mut Registers) -> &mut u8>) {
+        let reg = &mut self.cpu.state.registers;
+        let alt = &mut self.cpu.state.alt_registers;
+        for s in selectors {
+            mem::swap(s(reg), s(alt));
+        }
     }
 }
