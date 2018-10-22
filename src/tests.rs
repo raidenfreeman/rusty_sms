@@ -4,7 +4,7 @@ mod tests {
     use vm::cpu::flags::Flag;
     use vm::cpu::registers::Registers;
     use vm::machine::Machine;
-    use vm::opcodes::Opcode;
+    use vm::instructions::opcodes::Opcode;
 
     fn run_program(regs: fn(&mut Registers), stream: Vec<Opcode>) -> Machine {
         let mut vm = Machine::new();
