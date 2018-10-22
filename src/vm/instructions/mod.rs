@@ -4,6 +4,7 @@ mod control;
 mod exchange;
 mod memory;
 pub mod opcodes;
+mod stack;
 
 use vm::cpu::flags::Flag;
 use vm::instructions::opcodes::Opcode;
@@ -123,6 +124,11 @@ impl Machine {
             Opcode::ExAFAF => self.shadow_exchange_af(),
             Opcode::ExDEHL => self.exhange_de_with_hl(),
             Opcode::ExVSPHL => self.exchage_memory_from_sp_with_hl(),
+
+            Opcode::PushAF => self.push_to_stack(|regs| (regs.a, regs.f)),
+            Opcode::PushBC => self.push_to_stack(|regs| (regs.b, regs.c)),
+            Opcode::PushDE => self.push_to_stack(|regs| (regs.d, regs.e)),
+            Opcode::PushHL => self.push_to_stack(|regs| (regs.h, regs.l)),
 
             _ => panic!(),
         }

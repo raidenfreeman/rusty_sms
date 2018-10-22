@@ -1,6 +1,6 @@
 use std::mem;
-use vm::machine::Machine;
 use vm::cpu::registers::Registers;
+use vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn exchange(&mut self, selectors: Vec<fn(&mut Registers) -> (&mut u8, &mut u8)>) {
@@ -11,7 +11,7 @@ impl Machine {
         }
     }
 
-        pub(crate) fn exchange_with_shadow(&mut self, selectors: Vec<fn(&mut Registers) -> &mut u8>) {
+    pub(crate) fn exchange_with_shadow(&mut self, selectors: Vec<fn(&mut Registers) -> &mut u8>) {
         let reg = &mut self.cpu.state.registers;
         let alt = &mut self.cpu.state.alt_registers;
         for s in selectors {
@@ -20,29 +20,26 @@ impl Machine {
     }
 
     pub(crate) fn shadow_exchange_af(&mut self) {
-        self.exchange_with_shadow(vec![
-            |regs| &mut regs.a,
-            |regs| &mut regs.f
-        ]);
+        self.exchange_with_shadow(vec![|regs| &mut regs.a, |regs| &mut regs.f]);
         self.clock(4);
     }
 
-    pub(crate) fn shadow_exchange_bc_de_hl(&mut self) { 
+    pub(crate) fn shadow_exchange_bc_de_hl(&mut self) {
         self.exchange_with_shadow(vec![
             |regs| &mut regs.b,
             |regs| &mut regs.c,
             |regs| &mut regs.d,
             |regs| &mut regs.e,
             |regs| &mut regs.h,
-            |regs| &mut regs.l
+            |regs| &mut regs.l,
         ]);
         self.clock(4);
     }
 
     pub(crate) fn exhange_de_with_hl(&mut self) {
         self.exchange(vec![
-            |regs| (&mut regs.d, &mut regs.h),            
-            |regs| (&mut regs.e, &mut regs.l)
+            |regs| (&mut regs.d, &mut regs.h),
+            |regs| (&mut regs.e, &mut regs.l),
         ]);
         self.clock(4);
     }
