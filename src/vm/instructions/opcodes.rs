@@ -14,6 +14,8 @@ pub enum Opcode {
 
     RLCA = 0x07,
 
+    ExAFAF = 0x08,
+
     DecBC = 0x0B,
     IncC = 0x0C,
     DecC = 0x0D,
@@ -149,7 +151,7 @@ pub enum Opcode {
     RetPO = 0xE0,
     PopHL = 0xE1,
     JpPOXX = 0xE2,
-    ExSPHL = 0xE3,
+    ExVSPHL = 0xE3,
     CallPoXX = 0xE4,
     PushHL = 0xE5,
     AndX = 0xE6,

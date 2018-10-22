@@ -1,7 +1,7 @@
 mod arithmetic;
 mod bitwise;
 mod control;
-mod interrupts;
+mod exchange;
 mod memory;
 pub mod opcodes;
 
@@ -119,7 +119,10 @@ impl Machine {
 
             Opcode::RLCA => self.rotate_accumulator_left(),
 
-            Opcode::Exx => self.exchange_registers(),
+            Opcode::Exx => self.exchange_all_registers_with_shadow(),
+            Opcode::ExAFAF => self.exchange_accumulator_and_flags_with_shadow(),
+            Opcode::ExDeHl => self.exhange_de_with_hl(),
+            Opcode::ExVSPHL => self.exchage_memory_from_sp_with_hl(),
 
             _ => panic!(),
         }

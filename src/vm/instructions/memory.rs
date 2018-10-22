@@ -33,5 +33,5 @@ impl Machine {
             self.ram.write_u8(address, value);
         }
         self.clock(7);
-    }
+    }    
 }
