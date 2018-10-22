@@ -130,6 +130,11 @@ impl Machine {
             Opcode::PushDE => self.push_to_stack(|regs| (regs.d, regs.e)),
             Opcode::PushHL => self.push_to_stack(|regs| (regs.h, regs.l)),
 
+            Opcode::PopAF => self.pop_from_stack(|regs| (&mut regs.a, &mut regs.f)),
+            Opcode::PopBC => self.pop_from_stack(|regs| (&mut regs.b, &mut regs.c)),
+            Opcode::PopDE => self.pop_from_stack(|regs| (&mut regs.d, &mut regs.e)),
+            Opcode::PopHL => self.pop_from_stack(|regs| (&mut regs.h, &mut regs.l)),
+
             _ => panic!(),
         }
     }
