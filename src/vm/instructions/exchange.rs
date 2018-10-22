@@ -1,37 +1,49 @@
 use std::mem;
 use vm::machine::Machine;
+use vm::cpu::registers::Registers;
 
 impl Machine {
-    pub(crate) fn exchange_all_registers_with_shadow(&mut self) {
-        {
-            let reg = &mut self.cpu.state.registers;
-            let alt = &mut self.cpu.state.alt_registers;
-            mem::swap(&mut reg.b, &mut alt.b);
-            mem::swap(&mut reg.c, &mut alt.c);
-            mem::swap(&mut reg.d, &mut alt.d);
-            mem::swap(&mut reg.e, &mut alt.e);
-            mem::swap(&mut reg.h, &mut alt.h);
-            mem::swap(&mut reg.l, &mut alt.l);
+    pub(crate) fn exchange(&mut self, selectors: Vec<fn(&mut Registers) -> (&mut u8, &mut u8)>) {
+        let reg = &mut self.cpu.state.registers;
+        for s in selectors {
+            let (r1, r2) = s(reg);
+            mem::swap(r1, r2);
         }
+    }
+
+        pub(crate) fn exchange_with_shadow(&mut self, selectors: Vec<fn(&mut Registers) -> &mut u8>) {
+        let reg = &mut self.cpu.state.registers;
+        let alt = &mut self.cpu.state.alt_registers;
+        for s in selectors {
+            mem::swap(s(reg), s(alt));
+        }
+    }
+
+    pub(crate) fn shadow_exchange_af(&mut self) {
+        self.exchange_with_shadow(vec![
+            |regs| &mut regs.a,
+            |regs| &mut regs.f
+        ]);
         self.clock(4);
     }
 
-    pub(crate) fn exchange_accumulator_and_flags_with_shadow(&mut self) {
-        {
-            let reg = &mut self.cpu.state.registers;
-            let alt = &mut self.cpu.state.alt_registers;
-            mem::swap(&mut reg.a, &mut alt.a);
-            mem::swap(&mut reg.f, &mut alt.f);
-        }
+    pub(crate) fn shadow_exchange_bc_de_hl(&mut self) { 
+        self.exchange_with_shadow(vec![
+            |regs| &mut regs.b,
+            |regs| &mut regs.c,
+            |regs| &mut regs.d,
+            |regs| &mut regs.e,
+            |regs| &mut regs.h,
+            |regs| &mut regs.l
+        ]);
         self.clock(4);
     }
 
     pub(crate) fn exhange_de_with_hl(&mut self) {
-        {
-            let reg = &mut self.cpu.state.registers;
-            mem::swap(&mut reg.d, &mut reg.h);
-            mem::swap(&mut reg.e, &mut reg.l);
-        }
+        self.exchange(vec![
+            |regs| (&mut regs.d, &mut regs.h),            
+            |regs| (&mut regs.e, &mut regs.l)
+        ]);
         self.clock(4);
     }
 

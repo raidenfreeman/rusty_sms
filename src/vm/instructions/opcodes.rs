@@ -159,7 +159,7 @@ pub enum Opcode {
     RetPE = 0xE8,
     JpHL = 0xE9,
     JpPEXX = 0xEA,
-    ExDeHl = 0xEB,
+    ExDEHL = 0xEB,
     CallPeXX = 0xEC,
     EXTD = 0xED,
     XorX = 0xEE,
