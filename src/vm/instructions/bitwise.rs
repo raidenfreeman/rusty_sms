@@ -4,28 +4,54 @@ use vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn and_register(&mut self, selector: fn(&Registers) -> u8) {
-        self.bitwise_operation(selector, |a, b| a & b, true);
-        self.clock(4);
+        self.bitwise_with_register(selector, |a, b| a & b, true);
     }
 
     pub(crate) fn or_register(&mut self, selector: fn(&Registers) -> u8) {
-        self.bitwise_operation(selector, |a, b| a | b, false);
-        self.clock(4);
+        self.bitwise_with_register(selector, |a, b| a | b, false);
     }
 
     pub(crate) fn xor_register(&mut self, selector: fn(&Registers) -> u8) {
-        self.bitwise_operation(selector, |a, b| a ^ b, false);
+        self.bitwise_with_register(selector, |a, b| a ^ b, false);
+    }
+
+    pub(crate) fn and_value(&mut self) {
+        self.bitwise_with_value(|a, b| a & b, true);
+    }
+
+    pub(crate) fn or_value(&mut self) {
+        self.bitwise_with_value(|a, b| a | b, false);
+    }
+
+    pub(crate) fn xor_value(&mut self) {
+        self.bitwise_with_value(|a, b| a ^ b, false);
+    }
+
+    fn bitwise_with_register(
+        &mut self,
+        selector: fn(&Registers) -> u8,
+        operation: fn(u8, u8) -> u8,
+        half_carry_value: bool,
+    ) {
+        let operand = selector(&self.cpu.state.registers);
+        self.bitwise_operation(operand, operation, half_carry_value);
         self.clock(4);
     }
 
-    pub(crate) fn bitwise_operation(
+    fn bitwise_with_value(&mut self, operation: fn(u8, u8) -> u8, half_carry_value: bool) {
+        let operand = self.next_byte();
+        self.bitwise_operation(operand, operation, half_carry_value);
+        self.clock(7);
+    }
+
+    fn bitwise_operation(
         &mut self,
-        operand: fn(&Registers) -> u8,
+        operand: u8,
         operation: fn(u8, u8) -> u8,
         half_carry_value: bool,
     ) {
         let op1 = self.cpu.state.registers.a;
-        let op2 = operand(&self.cpu.state.registers);
+        let op2 = operand;
         let result = operation(op1, op2);
         let parity = (0..8).fold(0, |acc, b| acc + (result >> b) & 1) % 2 == 0;
 
@@ -40,7 +66,7 @@ impl Machine {
 
     pub(crate) fn rotate_accumulator_left(&mut self) {
         let old_value = self.cpu.state.registers.a as u16;
-        let second_most_significant_bit = if old_value & 0x40 != 0 { 1 } else { 0 }; 
+        let second_most_significant_bit = if old_value & 0x40 != 0 { 1 } else { 0 };
         let new_value = (old_value << 1) + second_most_significant_bit;
         self.cpu.state.registers.a = new_value as u8;
         Flag::Carry.set(&mut self.cpu.state.status, second_most_significant_bit == 1);

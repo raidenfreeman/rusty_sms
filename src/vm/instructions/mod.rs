@@ -71,14 +71,6 @@ impl Machine {
             Opcode::SbcH => self.subtract_carry_register(|regs| regs.h),
             Opcode::SbcL => self.subtract_carry_register(|regs| regs.l),
 
-            Opcode::AndA => self.and_register(|regs| regs.a),
-            Opcode::AndB => self.and_register(|regs| regs.b),
-            Opcode::AndC => self.and_register(|regs| regs.c),
-            Opcode::AndD => self.and_register(|regs| regs.d),
-            Opcode::AndE => self.and_register(|regs| regs.e),
-            Opcode::AndH => self.and_register(|regs| regs.h),
-            Opcode::AndL => self.and_register(|regs| regs.l),
-
             Opcode::DecA => self.decrement_register(|regs| &mut regs.a),
             Opcode::DecB => self.decrement_register(|regs| &mut regs.b),
             Opcode::DecC => self.decrement_register(|regs| &mut regs.c),
@@ -102,6 +94,15 @@ impl Machine {
             Opcode::LdVBCA => self.load_into_memory(|regs| regs.a, |regs| (regs.b, regs.c)),
             Opcode::LdVDEA => self.load_into_memory(|regs| regs.a, |regs| (regs.d, regs.e)),
 
+            Opcode::AndA => self.and_register(|regs| regs.a),
+            Opcode::AndB => self.and_register(|regs| regs.b),
+            Opcode::AndC => self.and_register(|regs| regs.c),
+            Opcode::AndD => self.and_register(|regs| regs.d),
+            Opcode::AndE => self.and_register(|regs| regs.e),
+            Opcode::AndH => self.and_register(|regs| regs.h),
+            Opcode::AndL => self.and_register(|regs| regs.l),
+            Opcode::AndX => self.and_value(),
+
             Opcode::OrA => self.or_register(|regs| regs.a),
             Opcode::OrB => self.or_register(|regs| regs.b),
             Opcode::OrC => self.or_register(|regs| regs.c),
@@ -109,6 +110,7 @@ impl Machine {
             Opcode::OrE => self.or_register(|regs| regs.e),
             Opcode::OrH => self.or_register(|regs| regs.h),
             Opcode::OrL => self.or_register(|regs| regs.l),
+            Opcode::OrX => self.or_value(),
 
             Opcode::XorA => self.xor_register(|regs| regs.a),
             Opcode::XorB => self.xor_register(|regs| regs.b),
@@ -117,6 +119,7 @@ impl Machine {
             Opcode::XorE => self.xor_register(|regs| regs.e),
             Opcode::XorH => self.xor_register(|regs| regs.h),
             Opcode::XorL => self.xor_register(|regs| regs.l),
+            Opcode::XorX => self.xor_value(),
 
             Opcode::RLCA => self.rotate_accumulator_left(),
 
