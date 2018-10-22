@@ -93,10 +93,10 @@ impl Machine {
 
             Opcode::Halt => self.halt(),
 
-            Opcode::LdBCXX => self.load_into_register(|regs| (&mut regs.b, &mut regs.c)),
-            Opcode::LdDEXX => self.load_into_register(|regs| (&mut regs.d, &mut regs.e)),
-            Opcode::LdHLXX => self.load_into_register(|regs| (&mut regs.h, &mut regs.l)),
-            Opcode::LdSPXX => self.load_into_register(|regs| (&mut regs.s, &mut regs.p)),
+            Opcode::LdBCXX => self.load_into_register_pair(|regs| (&mut regs.b, &mut regs.c)),
+            Opcode::LdDEXX => self.load_into_register_pair(|regs| (&mut regs.d, &mut regs.e)),
+            Opcode::LdHLXX => self.load_into_register_pair(|regs| (&mut regs.h, &mut regs.l)),
+            Opcode::LdSPXX => self.load_into_register_pair(|regs| (&mut regs.s, &mut regs.p)),
 
             Opcode::LdVBCA => self.load_into_memory(|regs| &regs.a, |regs| (&regs.b, &regs.c)),
             Opcode::LdVDEA => self.load_into_memory(|regs| &regs.a, |regs| (&regs.d, &regs.e)),

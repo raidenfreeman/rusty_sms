@@ -1,9 +1,8 @@
 use vm::cpu::registers::Registers;
-use vm::cpu::state::State;
 use vm::machine::Machine;
 
 impl Machine {
-    pub(crate) fn load_into_register(
+    pub(crate) fn load_into_register_pair(
         &mut self,
         selector: fn(&mut Registers) -> (&mut u8, &mut u8),
     ) {
@@ -13,16 +12,6 @@ impl Machine {
             let (high_reg, low_reg) = selector(&mut self.cpu.state.registers);
             *high_reg = high_val;
             *low_reg = low_val;
-        }
-        self.clock(10);
-    }
-
-    pub(crate) fn load_into_double_register(&mut self, selector: fn(&mut State) -> &mut u16) {
-        let address = self.next_word();
-        let val = self.ram.read_u16(address);
-        {
-            let reg = selector(&mut self.cpu.state);
-            *reg = val;
         }
         self.clock(10);
     }
