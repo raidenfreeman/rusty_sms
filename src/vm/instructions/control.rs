@@ -5,6 +5,11 @@ impl Machine {
         self.clock(4);
     }
 
+    pub(crate) fn halt(&mut self) {
+        self.cpu.halt();
+        self.clock(4);
+    }
+
     pub(crate) fn jump(&mut self, predicate: fn(&u8) -> bool) {
         let dest = self.next_word();
 
