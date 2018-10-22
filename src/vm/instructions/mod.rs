@@ -5,9 +5,9 @@ mod interrupts;
 mod memory;
 pub mod opcodes;
 
-use vm::machine::Machine;
-use vm::instructions::opcodes::Opcode;
 use vm::cpu::flags::Flag;
+use vm::instructions::opcodes::Opcode;
+use vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn execute(&mut self) {

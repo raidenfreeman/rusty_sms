@@ -1,6 +1,6 @@
+use vm::cpu::flags::Flag;
 use vm::cpu::registers::Registers;
 use vm::machine::Machine;
-use vm::cpu::flags::Flag;
 
 impl Machine {
     pub(crate) fn and_register(&mut self, selector: fn(&Registers) -> u8) {

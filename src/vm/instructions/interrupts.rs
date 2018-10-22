@@ -1,7 +1,7 @@
-use vm::machine::Machine;
 use std::mem;
+use vm::machine::Machine;
 
-impl Machine {    
+impl Machine {
     pub(crate) fn exchange_registers(&mut self) {
         {
             let reg = &mut self.cpu.state.registers;

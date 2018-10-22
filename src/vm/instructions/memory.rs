@@ -1,9 +1,12 @@
-use vm::cpu::state::State;
 use vm::cpu::registers::Registers;
+use vm::cpu::state::State;
 use vm::machine::Machine;
 
 impl Machine {
-    pub(crate) fn load_into_register(&mut self, selector: fn(&mut Registers) -> (&mut u8, &mut u8)) {
+    pub(crate) fn load_into_register(
+        &mut self,
+        selector: fn(&mut Registers) -> (&mut u8, &mut u8),
+    ) {
         let address = self.next_word();
         let (low_val, high_val) = (self.ram.read_u8(address), self.ram.read_u8(address + 1));
         {
