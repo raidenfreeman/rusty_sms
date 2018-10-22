@@ -117,6 +117,8 @@ impl Machine {
             Opcode::XorH => self.xor_register(|regs| regs.h),
             Opcode::XorL => self.xor_register(|regs| regs.l),
 
+            Opcode::RLCA => self.rotate_accumulator_left(),
+
             Opcode::Exx => self.exchange_registers(),
 
             _ => panic!(),

@@ -12,6 +12,8 @@ pub enum Opcode {
 
     LdBX = 0x06,
 
+    RLCA = 0x07,
+
     DecBC = 0x0B,
     IncC = 0x0C,
     DecC = 0x0D,

@@ -37,4 +37,15 @@ impl Machine {
         Flag::Zero.set(status, result == 0x00);
         Flag::Sign.set(status, result > 0x7F);
     }
+
+    pub(crate) fn rotate_accumulator_left(&mut self) {
+        let old_value = self.cpu.state.registers.a as u16;
+        let old_carry = Flag::Carry.get_bit(&mut self.cpu.state.status) as u16;
+        let new_value = (old_value << 1) + old_carry;
+        let new_carry = new_value & 0x100 != 0;
+        Flag::Carry.set(&mut self.cpu.state.status, new_carry);
+        Flag::HalfCarry.set(&mut self.cpu.state.status, false);
+        Flag::AddSubtract.set(&mut self.cpu.state.status, false);
+        self.clock(4);
+    }
 }
