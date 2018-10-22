@@ -9,6 +9,9 @@ pub enum Opcode {
     IncBC = 0x03,
     IncB = 0x04,
     DecB = 0x05,
+
+    LdBX = 0x06,
+
     DecBC = 0x0B,
     IncC = 0x0C,
     DecC = 0x0D,

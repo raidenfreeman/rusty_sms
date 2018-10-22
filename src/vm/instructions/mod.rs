@@ -98,8 +98,8 @@ impl Machine {
             Opcode::LdHLXX => self.load_into_register_pair(|regs| (&mut regs.h, &mut regs.l)),
             Opcode::LdSPXX => self.load_into_register_pair(|regs| (&mut regs.s, &mut regs.p)),
 
-            Opcode::LdVBCA => self.load_into_memory(|regs| &regs.a, |regs| (&regs.b, &regs.c)),
-            Opcode::LdVDEA => self.load_into_memory(|regs| &regs.a, |regs| (&regs.d, &regs.e)),
+            Opcode::LdVBCA => self.load_into_memory(|regs| regs.a, |regs| (regs.b, regs.c)),
+            Opcode::LdVDEA => self.load_into_memory(|regs| regs.a, |regs| (regs.d, regs.e)),
 
             Opcode::OrA => self.or_register(|regs| regs.a),
             Opcode::OrB => self.or_register(|regs| regs.b),
@@ -123,7 +123,7 @@ impl Machine {
         }
     }
 
-    fn next_byte(self: &mut Machine) -> u8 {
+    fn next_byte(&mut self) -> u8 {
         let pc = self.cpu.state.program_counter;
         let val = self.ram.read_u8(pc);
         let (result, overflow) = pc.overflowing_add(1);
@@ -133,6 +133,12 @@ impl Machine {
             self.cpu.state.program_counter = result;
         }
         val
+    }
+
+    fn next_byte_pair(&mut self) -> (u8, u8) {
+        let low = self.next_byte();
+        let high = self.next_byte();
+        (high, low)
     }
 
     fn next_word(&mut self) -> u16 {
