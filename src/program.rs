@@ -1,4 +1,4 @@
-use vm::opcodes::Opcode;
+use vm::instructions::opcodes::Opcode;
 
 pub struct Program {
     bin: Vec<u8>,

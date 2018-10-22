@@ -3,8 +3,8 @@ mod tests {
     use program::Program;
     use vm::cpu::flags::Flag;
     use vm::cpu::registers::Registers;
+    use vm::instructions::opcodes::Opcode;
     use vm::machine::Machine;
-    use vm::opcodes::Opcode;
 
     fn run_program(regs: fn(&mut Registers), stream: Vec<Opcode>) -> Machine {
         let mut vm = Machine::new();
