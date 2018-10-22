@@ -13,7 +13,7 @@ impl Machine {
     pub(crate) fn execute(&mut self) {
         let opcode = Opcode::from(self.next_byte());
         match opcode {
-            Opcode::Nop => self.clock(4),
+            Opcode::Nop => self.nop(),
 
             Opcode::IncA => self.increment_register(|regs| &mut regs.a),
             Opcode::IncB => self.increment_register(|regs| &mut regs.b),
