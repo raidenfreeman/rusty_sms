@@ -22,8 +22,18 @@ impl Registers {
             f: 0,
             h: 0,
             l: 0,
-            s: 0,
-            p: 0,
+            s: 0xFF,
+            p: 0xFF,
         }
+    }
+
+    pub fn u8s_to_u16(high: u8, low: u8) -> u16 {
+        ((high as u16) << 0x08) | (low as u16)
+    }
+
+    pub fn u16_to_u8s(value: u16) -> (u8, u8) {
+        let low = value as u8;
+        let high = (value >> 8) as u8;
+        (high, low)
     }
 }
