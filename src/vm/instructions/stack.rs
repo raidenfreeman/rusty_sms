@@ -37,4 +37,14 @@ impl Machine {
         self.cpu.state.registers.p = p;
         self.clock(10);
     }
+
+    pub(crate) fn pop_stack_to_program_counter(&mut self) {
+        let sp = Registers::u8s_to_u16(self.cpu.state.registers.s, self.cpu.state.registers.p);
+        let high_val = self.ram.read_u8(sp);
+        let low_val = self.ram.read_u8(sp + 1);
+        self.cpu.state.program_counter = Registers::u8s_to_u16(high_val, low_val);
+        let (s, p) = Registers::u16_to_u8s(sp + 2);
+        self.cpu.state.registers.s = s;
+        self.cpu.state.registers.p = p;
+    }
 }

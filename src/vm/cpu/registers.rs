@@ -27,13 +27,13 @@ impl Registers {
         }
     }
 
-    pub fn u8s_to_u16(first: u8, second: u8) -> u16 {
-        ((first as u16) << 0x08) | (second as u16)
+    pub fn u8s_to_u16(high: u8, low: u8) -> u16 {
+        ((high as u16) << 0x08) | (low as u16)
     }
 
     pub fn u16_to_u8s(value: u16) -> (u8, u8) {
-        let first = ((value | 0xFF00) >> 8) as u8;
-        let second = (value | 0x00FF) as u8;
-        (first, second)
+        let low = value as u8;
+        let high = (value >> 8) as u8;
+        (high, low)
     }
 }

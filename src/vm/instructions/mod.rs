@@ -49,6 +49,16 @@ impl Machine {
             Opcode::CallPXX => self.call(|status| !Flag::Sign.get(status)),
             Opcode::CallMXX => self.call(|status| Flag::Sign.get(status)),
 
+            Opcode::Ret => self.ret(),
+            Opcode::RetNZ => self.ret_conditional(|status| !Flag::Zero.get(status)),
+            Opcode::RetZ => self.ret_conditional(|status| Flag::Zero.get(status)),
+            Opcode::RetNC => self.ret_conditional(|status| !Flag::Carry.get(status)),
+            Opcode::RetC => self.ret_conditional(|status| Flag::Carry.get(status)),
+            Opcode::RetPO => self.ret_conditional(|status| Flag::ParityOverflow.get(status)),
+            Opcode::RetPE => self.ret_conditional(|status| !Flag::ParityOverflow.get(status)),
+            Opcode::RetP => self.ret_conditional(|status| !Flag::Sign.get(status)),
+            Opcode::RetM => self.ret_conditional(|status| Flag::Sign.get(status)),
+
             Opcode::AddA => self.add_register(|regs| regs.a),
             Opcode::AddB => self.add_register(|regs| regs.b),
             Opcode::AddC => self.add_register(|regs| regs.c),
