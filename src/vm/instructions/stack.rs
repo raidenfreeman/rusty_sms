@@ -13,6 +13,16 @@ impl Machine {
         self.clock(11);
     }
 
+    pub(crate) fn push_program_counter_to_stack(&mut self) {
+        let (op1, op2) = Registers::u16_to_u8s(self.cpu.state.program_counter);
+        let sp = Registers::u8s_to_u16(self.cpu.state.registers.s, self.cpu.state.registers.p);
+        self.ram.write_u8(sp - 1, op1);
+        self.ram.write_u8(sp - 2, op2);
+        let (s, p) = Registers::u16_to_u8s(sp - 2);
+        self.cpu.state.registers.s = s;
+        self.cpu.state.registers.p = p;
+    }
+
     pub(crate) fn pop_from_stack(&mut self, selector: fn(&mut Registers) -> (&mut u8, &mut u8)) {
         let sp = Registers::u8s_to_u16(self.cpu.state.registers.s, self.cpu.state.registers.p);
         let high_val = self.ram.read_u8(sp);

@@ -39,6 +39,16 @@ impl Machine {
             Opcode::JpPXX => self.jump(|status| !Flag::Sign.get(status)),
             Opcode::JpMXX => self.jump(|status| Flag::Sign.get(status)),
 
+            Opcode::CallXX => self.call(|_| true),
+            Opcode::CallNZXX => self.call(|status| !Flag::Zero.get(status)),
+            Opcode::CallZXX => self.jump(|status| Flag::Zero.get(status)),
+            Opcode::CallNCXX => self.jump(|status| !Flag::Carry.get(status)),
+            Opcode::CallCXX => self.jump(|status| Flag::Carry.get(status)),
+            Opcode::CallPOXX => self.jump(|status| Flag::ParityOverflow.get(status)),
+            Opcode::CallPEXX => self.jump(|status| !Flag::ParityOverflow.get(status)),
+            Opcode::CallPXX => self.jump(|status| !Flag::Sign.get(status)),
+            Opcode::CallMXX => self.jump(|status| Flag::Sign.get(status)),
+
             Opcode::AddA => self.add_register(|regs| regs.a),
             Opcode::AddB => self.add_register(|regs| regs.b),
             Opcode::AddC => self.add_register(|regs| regs.c),

@@ -19,4 +19,16 @@ impl Machine {
 
         self.clock(10);
     }
+
+    pub(crate) fn call(&mut self, condition: fn(&u8) -> bool) {
+        let dest = self.next_word();
+
+        if condition(&self.cpu.state.status) {
+            self.push_program_counter_to_stack();
+            self.cpu.state.program_counter = dest;
+            self.clock(17);
+        }
+
+        self.clock(10);
+    }
 }
