@@ -22,8 +22,8 @@ impl Registers {
             f: 0,
             h: 0,
             l: 0,
-            s: 0,
-            p: 0,
+            s: 0xFF,
+            p: 0xFF,
         }
     }
 
