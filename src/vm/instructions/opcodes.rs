@@ -29,6 +29,8 @@ pub enum Opcode {
 
     LdDEXX = 0x11,
     LdVDEA = 0x12,
+    LdAVXX = 0x3A,
+    LdVHLX = 0x36,
 
     IncDE = 0x13,
     IncD = 0x14,
@@ -39,6 +41,7 @@ pub enum Opcode {
 
     LdHLXX = 0x21,
     LdVXXHL = 0x22,
+    LdHLVXX = 0x2A,
 
     IncHL = 0x23,
     IncH = 0x24,
@@ -49,6 +52,8 @@ pub enum Opcode {
 
     LdSPXX = 0x31,
     LdVXXA = 0x32,
+    LdAVBC = 0x0A,
+    LdAVDE = 0x1A,
 
     IncSP = 0x33,
     DecSP = 0x3B,
