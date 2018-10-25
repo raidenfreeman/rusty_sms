@@ -149,4 +149,19 @@ mod tests {
         jump_test_flag(Opcode::JpMXX, 0x04, Flag::Sign, true, 0x05);
         jump_test_flag(Opcode::JpMXX, 0x04, Flag::Sign, false, 0x04);
     }
+
+    #[test]
+    fn load() {
+        let mut vm = Machine::new();
+        let mut p = Program::new();
+        p.add(Opcode::LdBC);
+        vm.load(&p);
+
+        vm.cpu.state.registers.b = 20;
+        vm.cpu.state.registers.c = 0;
+
+        vm.start();
+
+        assert_eq!(vm.cpu.state.registers.c, 20);
+    }
 }
