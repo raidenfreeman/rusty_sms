@@ -157,11 +157,11 @@ mod tests {
         p.add(Opcode::LdBC);
         vm.load(&p);
 
-        vm.cpu.state.registers.b = 20;
-        vm.cpu.state.registers.c = 0;
+        vm.cpu.state.registers.b = 0;
+        vm.cpu.state.registers.c = 20;
 
         vm.start();
 
-        assert_eq!(vm.cpu.state.registers.c, 20);
+        assert_eq!(vm.cpu.state.registers.b, 20);
     }
 }
