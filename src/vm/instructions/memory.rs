@@ -2,9 +2,10 @@ use vm::cpu::registers::Registers;
 use vm::machine::Machine;
 
 impl Machine {
-    pub(crate) fn load_register_into_register(&mut self, selector: fn(&mut Registers) -> (u8, &mut u8)) {
+    pub(crate) fn load_register_into_register(&mut self, source_selector: fn(&Registers) -> u8, dest_selector: fn(&mut Registers) -> &mut u8) {
         {
-            let (source, dest) = selector(&mut self.cpu.state.registers);
+            let source = source_selector(&self.cpu.state.registers);
+            let dest = dest_selector(&mut self.cpu.state.registers);
             *dest = source;
         }
         self.clock(4);
@@ -21,11 +22,11 @@ impl Machine {
         self.clock(7);
     }
 
-    pub(crate) fn load_register_into_memory(&mut self, selector: fn(&mut Registers) -> u8, pointer: fn(&Registers) -> (u8, u8)) {
+    pub(crate) fn load_register_into_memory(&mut self, selector: fn(&Registers) -> u8, pointer: fn(&Registers) -> (u8, u8)) {
         {
             let (high_addr, low_addr) = pointer(&self.cpu.state.registers);
             let address = Registers::u8s_to_u16(high_addr, low_addr);
-            let value = selector(&mut self.cpu.state.registers);
+            let value = selector(&self.cpu.state.registers);
             self.ram.write_u8(address, value);
         }
         self.clock(7);
