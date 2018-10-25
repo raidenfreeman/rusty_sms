@@ -5,12 +5,19 @@ pub enum Opcode {
 
     LdBCXX = 0x01,
     LdVBCA = 0x02,
+    
 
     IncBC = 0x03,
     IncB = 0x04,
     DecB = 0x05,
 
     LdBX = 0x06,
+    LdCX = 0x0E,
+    LdDX = 0x16,
+    LdEX = 0x1E,
+    LdHX = 0x26,
+    LdLX = 0x2E,
+    LdAX = 0x3E,
 
     RLCA = 0x07,
 
