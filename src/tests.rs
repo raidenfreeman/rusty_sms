@@ -164,4 +164,18 @@ mod tests {
 
         assert_eq!(vm.cpu.state.registers.b, 20);
     }
+
+    #[test]
+    fn load_param() {
+        let mut vm = Machine::new();
+        let mut p = Program::new();
+        p.add_param(Opcode::LdBX, 42);
+        vm.load(&p);
+
+        vm.cpu.state.registers.b = 0;
+
+        vm.start();
+
+        assert_eq!(vm.cpu.state.registers.b, 42);
+    }
 }

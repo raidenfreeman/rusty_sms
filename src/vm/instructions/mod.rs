@@ -185,6 +185,14 @@ impl Machine {
             Opcode::LdAHL => self.load_memory_into_register(|regs| (regs.h, regs.l), |regs| &mut regs.a),
             Opcode::LdAA => self.load_register_into_register(|regs| regs.a, |regs| &mut regs.a),
 
+            Opcode::LdBX => self.load_into_register(|regs| &mut regs.b),
+            Opcode::LdCX => self.load_into_register(|regs| &mut regs.c),
+            Opcode::LdDX => self.load_into_register(|regs| &mut regs.d),
+            Opcode::LdEX => self.load_into_register(|regs| &mut regs.e),
+            Opcode::LdHX => self.load_into_register(|regs| &mut regs.h),
+            Opcode::LdLX => self.load_into_register(|regs| &mut regs.l),
+            Opcode::LdAX => self.load_into_register(|regs| &mut regs.a),
+
             Opcode::AndA => self.and_register(|regs| regs.a),
             Opcode::AndB => self.and_register(|regs| regs.b),
             Opcode::AndC => self.and_register(|regs| regs.c),
