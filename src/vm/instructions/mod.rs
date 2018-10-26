@@ -193,6 +193,14 @@ impl Machine {
             Opcode::LdLX => self.load_into_register(|regs| &mut regs.l),
             Opcode::LdAX => self.load_into_register(|regs| &mut regs.a),
 
+            Opcode::LdAVBC => self.load_memory_into_register(|regs| (regs.b, regs.c), |regs| &mut regs.a),
+            Opcode::LdAVDE => self.load_memory_into_register(|regs| (regs.d, regs.e), |regs| &mut regs.a),
+            Opcode::LdVXXHL => self.load_wide_register_into_param_memory(|regs| (regs.h, regs.l)),
+            Opcode::LdHLVXX => self.load_param_memory_into_wide_register(|regs| (&mut regs.h, &mut regs.l)),
+            Opcode::LdVXXA => self.load_register_into_param_memory(|regs| regs.a),
+            Opcode::LdAVXX => self.load_param_memory_into_register(|regs| &mut regs.a),
+            Opcode::LdVHLX => self.load_param_into_memory(|regs| (regs.h, regs.l)),
+
             Opcode::AndA => self.and_register(|regs| regs.a),
             Opcode::AndB => self.and_register(|regs| regs.b),
             Opcode::AndC => self.and_register(|regs| regs.c),

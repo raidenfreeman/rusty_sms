@@ -2,58 +2,53 @@
 #[repr(u8)]
 pub enum Opcode {
     Nop = 0x00,
-
     LdBCXX = 0x01,
     LdVBCA = 0x02,
-    
-
     IncBC = 0x03,
     IncB = 0x04,
     DecB = 0x05,
-
     LdBX = 0x06,
-    LdCX = 0x0E,
-    LdDX = 0x16,
-    LdEX = 0x1E,
-    LdHX = 0x26,
-    LdLX = 0x2E,
-    LdAX = 0x3E,
-
     RLCA = 0x07,
-
     ExAFAF = 0x08,
-
+    LdAVBC = 0x0A,
     DecBC = 0x0B,
     IncC = 0x0C,
     DecC = 0x0D,
-
+    LdCX = 0x0E,
+    
     LdDEXX = 0x11,
     LdVDEA = 0x12,
-
     IncDE = 0x13,
     IncD = 0x14,
     DecD = 0x15,
+    LdDX = 0x16,
+    LdAVDE = 0x1A,
     DecDE = 0x1B,
     IncE = 0x1C,
     DecE = 0x1D,
+    LdEX = 0x1E,
 
     LdHLXX = 0x21,
     LdVXXHL = 0x22,
-
     IncHL = 0x23,
     IncH = 0x24,
     DecH = 0x25,
+    LdHX = 0x26,
+    LdHLVXX = 0x2A,
     DecHL = 0x2B,
     IncL = 0x2C,
     DecL = 0x2D,
+    LdLX = 0x2E,
 
     LdSPXX = 0x31,
     LdVXXA = 0x32,
-
     IncSP = 0x33,
+    LdVHLX = 0x36,
+    LdAVXX = 0x3A,
     DecSP = 0x3B,
     IncA = 0x3C,
     DecA = 0x3D,
+    LdAX = 0x3E,
 
     LdBB = 0x40,
     LdBC = 0x41,
@@ -101,7 +96,7 @@ pub enum Opcode {
     LdLC = 0x69,
     LdLD = 0x6A,
     LdLE = 0x6B,
-    LdLH = 0x6C, 
+    LdLH = 0x6C,
     LdLL = 0x6D,
     LdLHL = 0x6E,
     LdLA = 0x6F,
@@ -130,7 +125,6 @@ pub enum Opcode {
     AddH = 0x84,
     AddL = 0x85,
     AddA = 0x87,
-
     AdcB = 0x88,
     AdcC = 0x89,
     AdcD = 0x8A,
@@ -146,7 +140,6 @@ pub enum Opcode {
     SubH = 0x94,
     SubL = 0x95,
     SubA = 0x97,
-
     SbcB = 0x98,
     SbcC = 0x99,
     SbcD = 0x9A,
@@ -162,7 +155,6 @@ pub enum Opcode {
     AndH = 0xA4,
     AndL = 0xA5,
     AndA = 0xA7,
-
     XorB = 0xA8,
     XorC = 0xA9,
     XorD = 0xAA,
@@ -179,7 +171,6 @@ pub enum Opcode {
     OrL = 0xB5,
     OrHL = 0xB6,
     OrA = 0xB7,
-
     CpB = 0xB8,
     CpC = 0xB9,
     CpD = 0xBA,
@@ -205,6 +196,7 @@ pub enum Opcode {
     CallXX = 0xCD,
     AdcAX = 0xCE,
     Rst08h = 0xCF,
+
     RetNC = 0xD0,
     PopDE = 0xD1,
     JpNCXX = 0xD2,
@@ -221,6 +213,7 @@ pub enum Opcode {
     IX = 0xDD,
     SbcAX = 0xDE,
     Rst18h = 0xDF,
+
     RetPO = 0xE0,
     PopHL = 0xE1,
     JpPOXX = 0xE2,
@@ -237,6 +230,7 @@ pub enum Opcode {
     EXTD = 0xED,
     XorX = 0xEE,
     Rst28h = 0xEF,
+
     RetP = 0xF0,
     PopAF = 0xF1,
     JpPXX = 0xF2,
