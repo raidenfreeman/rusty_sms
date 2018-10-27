@@ -194,4 +194,10 @@ impl Machine {
             }
         }
     }
+
+    pub(crate) fn set_flag(&mut self, flag: Flag, value: fn(bool) -> bool) {
+        let previous = flag.get(&self.cpu.state.status);
+        flag.set(&mut self.cpu.state.status, value(previous));
+        self.clock(4);
+    }
 }

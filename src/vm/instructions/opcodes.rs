@@ -15,7 +15,7 @@ pub enum Opcode {
     IncC = 0x0C,
     DecC = 0x0D,
     LdCX = 0x0E,
-    
+
     LdDEXX = 0x11,
     LdVDEA = 0x12,
     IncDE = 0x13,
@@ -44,11 +44,13 @@ pub enum Opcode {
     LdVXXA = 0x32,
     IncSP = 0x33,
     LdVHLX = 0x36,
+    SCF = 0x37,
     LdAVXX = 0x3A,
     DecSP = 0x3B,
     IncA = 0x3C,
     DecA = 0x3D,
     LdAX = 0x3E,
+    CCF = 0x3F,
 
     LdBB = 0x40,
     LdBC = 0x41,
