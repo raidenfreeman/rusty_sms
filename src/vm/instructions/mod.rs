@@ -16,8 +16,6 @@ impl Machine {
         match opcode {
             Opcode::Nop => self.nop(),
 
-            Opcode::Halt => self.halt(),
-
             Opcode::Exx => self.shadow_exchange_bc_de_hl(),
             Opcode::ExAFAF => self.shadow_exchange_af(),
             Opcode::ExDEHL => self.exhange_de_with_hl(),
@@ -268,7 +266,7 @@ impl Machine {
             Opcode::CPL => self.complement_registers(|regs| &mut regs.a),
             Opcode::RLCA => self.rotate_accumulator_left(),
 
-            _ => panic!(),
+            Opcode::Halt => self.halt(),
         }
     }
 
