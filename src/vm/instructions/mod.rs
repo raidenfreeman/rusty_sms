@@ -16,6 +16,13 @@ impl Machine {
         match opcode {
             Opcode::Nop => self.nop(),
 
+            Opcode::Halt => self.halt(),
+
+            Opcode::Exx => self.shadow_exchange_bc_de_hl(),
+            Opcode::ExAFAF => self.shadow_exchange_af(),
+            Opcode::ExDEHL => self.exhange_de_with_hl(),
+            Opcode::ExVSPHL => self.exchage_memory_from_sp_with_hl(),
+
             Opcode::IncA => self.increment_register(|regs| &mut regs.a),
             Opcode::IncB => self.increment_register(|regs| &mut regs.b),
             Opcode::IncC => self.increment_register(|regs| &mut regs.c),
@@ -24,10 +31,55 @@ impl Machine {
             Opcode::IncH => self.increment_register(|regs| &mut regs.h),
             Opcode::IncL => self.increment_register(|regs| &mut regs.l),
 
+            Opcode::DecA => self.decrement_register(|regs| &mut regs.a),
+            Opcode::DecB => self.decrement_register(|regs| &mut regs.b),
+            Opcode::DecC => self.decrement_register(|regs| &mut regs.c),
+            Opcode::DecD => self.decrement_register(|regs| &mut regs.d),
+            Opcode::DecE => self.decrement_register(|regs| &mut regs.e),
+            Opcode::DecH => self.decrement_register(|regs| &mut regs.h),
+            Opcode::DecL => self.decrement_register(|regs| &mut regs.l),
+
             Opcode::IncBC => self.increment_register_wide(|regs| &mut regs.b, |regs| &mut regs.c),
             Opcode::IncDE => self.increment_register_wide(|regs| &mut regs.d, |regs| &mut regs.e),
             Opcode::IncHL => self.increment_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
             Opcode::IncSP => self.increment_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
+
+            Opcode::DecBC => self.decrement_register_wide(|regs| &mut regs.b, |regs| &mut regs.c),
+            Opcode::DecDE => self.decrement_register_wide(|regs| &mut regs.d, |regs| &mut regs.e),
+            Opcode::DecHL => self.decrement_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
+            Opcode::DecSP => self.decrement_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
+
+            Opcode::AddA => self.add_register(|regs| regs.a),
+            Opcode::AddB => self.add_register(|regs| regs.b),
+            Opcode::AddC => self.add_register(|regs| regs.c),
+            Opcode::AddD => self.add_register(|regs| regs.d),
+            Opcode::AddE => self.add_register(|regs| regs.e),
+            Opcode::AddH => self.add_register(|regs| regs.h),
+            Opcode::AddL => self.add_register(|regs| regs.l),
+
+            Opcode::SubA => self.subtract_register(|regs| regs.a),
+            Opcode::SubB => self.subtract_register(|regs| regs.b),
+            Opcode::SubC => self.subtract_register(|regs| regs.c),
+            Opcode::SubD => self.subtract_register(|regs| regs.d),
+            Opcode::SubE => self.subtract_register(|regs| regs.e),
+            Opcode::SubH => self.subtract_register(|regs| regs.h),
+            Opcode::SubL => self.subtract_register(|regs| regs.l),
+
+            Opcode::AdcA => self.add_carry_register(|regs| regs.a),
+            Opcode::AdcB => self.add_carry_register(|regs| regs.b),
+            Opcode::AdcC => self.add_carry_register(|regs| regs.c),
+            Opcode::AdcD => self.add_carry_register(|regs| regs.d),
+            Opcode::AdcE => self.add_carry_register(|regs| regs.e),
+            Opcode::AdcH => self.add_carry_register(|regs| regs.h),
+            Opcode::AdcL => self.add_carry_register(|regs| regs.l),
+
+            Opcode::SbcA => self.subtract_carry_register(|regs| regs.a),
+            Opcode::SbcB => self.subtract_carry_register(|regs| regs.b),
+            Opcode::SbcC => self.subtract_carry_register(|regs| regs.c),
+            Opcode::SbcD => self.subtract_carry_register(|regs| regs.d),
+            Opcode::SbcE => self.subtract_carry_register(|regs| regs.e),
+            Opcode::SbcH => self.subtract_carry_register(|regs| regs.h),
+            Opcode::SbcL => self.subtract_carry_register(|regs| regs.l),
 
             Opcode::JpXX => self.jump(|_| true),
             Opcode::JpNZXX => self.jump(|status| !Flag::Zero.get(status)),
@@ -58,53 +110,6 @@ impl Machine {
             Opcode::RetPE => self.ret_conditional(|status| !Flag::ParityOverflow.get(status)),
             Opcode::RetP => self.ret_conditional(|status| !Flag::Sign.get(status)),
             Opcode::RetM => self.ret_conditional(|status| Flag::Sign.get(status)),
-
-            Opcode::AddA => self.add_register(|regs| regs.a),
-            Opcode::AddB => self.add_register(|regs| regs.b),
-            Opcode::AddC => self.add_register(|regs| regs.c),
-            Opcode::AddD => self.add_register(|regs| regs.d),
-            Opcode::AddE => self.add_register(|regs| regs.e),
-            Opcode::AddH => self.add_register(|regs| regs.h),
-            Opcode::AddL => self.add_register(|regs| regs.l),
-
-            Opcode::AdcA => self.add_carry_register(|regs| regs.a),
-            Opcode::AdcB => self.add_carry_register(|regs| regs.b),
-            Opcode::AdcC => self.add_carry_register(|regs| regs.c),
-            Opcode::AdcD => self.add_carry_register(|regs| regs.d),
-            Opcode::AdcE => self.add_carry_register(|regs| regs.e),
-            Opcode::AdcH => self.add_carry_register(|regs| regs.h),
-            Opcode::AdcL => self.add_carry_register(|regs| regs.l),
-
-            Opcode::SubA => self.subtract_register(|regs| regs.a),
-            Opcode::SubB => self.subtract_register(|regs| regs.b),
-            Opcode::SubC => self.subtract_register(|regs| regs.c),
-            Opcode::SubD => self.subtract_register(|regs| regs.d),
-            Opcode::SubE => self.subtract_register(|regs| regs.e),
-            Opcode::SubH => self.subtract_register(|regs| regs.h),
-            Opcode::SubL => self.subtract_register(|regs| regs.l),
-
-            Opcode::SbcA => self.subtract_carry_register(|regs| regs.a),
-            Opcode::SbcB => self.subtract_carry_register(|regs| regs.b),
-            Opcode::SbcC => self.subtract_carry_register(|regs| regs.c),
-            Opcode::SbcD => self.subtract_carry_register(|regs| regs.d),
-            Opcode::SbcE => self.subtract_carry_register(|regs| regs.e),
-            Opcode::SbcH => self.subtract_carry_register(|regs| regs.h),
-            Opcode::SbcL => self.subtract_carry_register(|regs| regs.l),
-
-            Opcode::DecA => self.decrement_register(|regs| &mut regs.a),
-            Opcode::DecB => self.decrement_register(|regs| &mut regs.b),
-            Opcode::DecC => self.decrement_register(|regs| &mut regs.c),
-            Opcode::DecD => self.decrement_register(|regs| &mut regs.d),
-            Opcode::DecE => self.decrement_register(|regs| &mut regs.e),
-            Opcode::DecH => self.decrement_register(|regs| &mut regs.h),
-            Opcode::DecL => self.decrement_register(|regs| &mut regs.l),
-
-            Opcode::DecBC => self.decrement_register_wide(|regs| &mut regs.b, |regs| &mut regs.c),
-            Opcode::DecDE => self.decrement_register_wide(|regs| &mut regs.d, |regs| &mut regs.e),
-            Opcode::DecHL => self.decrement_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
-            Opcode::DecSP => self.decrement_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
-
-            Opcode::Halt => self.halt(),
 
             Opcode::LdBCXX => self.load_into_register_pair(|regs| (&mut regs.b, &mut regs.c)),
             Opcode::LdDEXX => self.load_into_register_pair(|regs| (&mut regs.d, &mut regs.e)),
@@ -158,7 +163,7 @@ impl Machine {
             }
             Opcode::LdEA => self.load_register_into_register(|regs| regs.a, |regs| &mut regs.e),
 
-            Opcode::LdHB => self.load_register_into_register(|regs| regs.b, |regs| &mut regs.h),
+            Opcode::LdHB => self.load_register_into_register(|regs| r - egs.b, |regs| &mut regs.h),
             Opcode::LdHC => self.load_register_into_register(|regs| regs.c, |regs| &mut regs.h),
             Opcode::LdHD => self.load_register_into_register(|regs| regs.d, |regs| &mut regs.h),
             Opcode::LdHE => self.load_register_into_register(|regs| regs.e, |regs| &mut regs.h),
@@ -248,13 +253,6 @@ impl Machine {
             Opcode::XorL => self.xor_register(|regs| regs.l),
             Opcode::XorX => self.xor_value(),
 
-            Opcode::RLCA => self.rotate_accumulator_left(),
-
-            Opcode::Exx => self.shadow_exchange_bc_de_hl(),
-            Opcode::ExAFAF => self.shadow_exchange_af(),
-            Opcode::ExDEHL => self.exhange_de_with_hl(),
-            Opcode::ExVSPHL => self.exchage_memory_from_sp_with_hl(),
-
             Opcode::PushAF => self.push_to_stack(|regs| (regs.a, regs.f)),
             Opcode::PushBC => self.push_to_stack(|regs| (regs.b, regs.c)),
             Opcode::PushDE => self.push_to_stack(|regs| (regs.d, regs.e)),
@@ -268,6 +266,7 @@ impl Machine {
             Opcode::SCF => self.set_carry_flag(),
             Opcode::CCF => self.complement_carry_flag(),
             Opcode::CPL => self.complement_registers(|regs| &mut regs.a),
+            Opcode::RLCA => self.rotate_accumulator_left(),
 
             _ => panic!(),
         }
