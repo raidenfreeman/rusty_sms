@@ -39,6 +39,7 @@ pub enum Opcode {
     IncL = 0x2C,
     DecL = 0x2D,
     LdLX = 0x2E,
+    CPL = 0x2F,
 
     LdSPXX = 0x31,
     LdVXXA = 0x32,

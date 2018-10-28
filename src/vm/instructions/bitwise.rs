@@ -3,6 +3,13 @@ use vm::cpu::registers::Registers;
 use vm::machine::Machine;
 
 impl Machine {
+    pub(crate) fn complement_registers(&mut self, selector: fn(&mut Registers) -> &mut u8) {
+        *selector(&mut self.cpu.state.registers) = *selector(&mut self.cpu.state.registers);
+        Flag::AddSubtract.set(&mut self.cpu.state.status, true);
+        Flag::HalfCarry.set(&mut self.cpu.state.status, true);
+        self.clock(4);
+    }
+
     pub(crate) fn and_register(&mut self, selector: fn(&Registers) -> u8) {
         self.bitwise_with_register(selector, |a, b| a & b, true);
     }

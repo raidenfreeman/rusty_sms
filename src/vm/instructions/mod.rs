@@ -267,6 +267,7 @@ impl Machine {
 
             Opcode::SCF => self.set_carry_flag(),
             Opcode::CCF => self.complement_carry_flag(),
+            Opcode::CPL => self.complement_registers(|regs| &mut regs.a),
 
             _ => panic!(),
         }
