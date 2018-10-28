@@ -265,8 +265,8 @@ impl Machine {
             Opcode::PopDE => self.pop_from_stack(|regs| (&mut regs.d, &mut regs.e)),
             Opcode::PopHL => self.pop_from_stack(|regs| (&mut regs.h, &mut regs.l)),
 
-            Opcode::SCF => self.set_flag(Flag::Carry, |_| true),
-            Opcode::CCF => self.set_flag(Flag::Carry, |c| !c),
+            Opcode::SCF => self.set_carry_flag(),
+            Opcode::CCF => self.complement_carry_flag(),
 
             _ => panic!(),
         }

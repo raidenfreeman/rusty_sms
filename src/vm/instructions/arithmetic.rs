@@ -195,9 +195,24 @@ impl Machine {
         }
     }
 
-    pub(crate) fn set_flag(&mut self, flag: Flag, value: fn(bool) -> bool) {
-        let previous = flag.get(&self.cpu.state.status);
-        flag.set(&mut self.cpu.state.status, value(previous));
+    pub(crate) fn set_carry_flag(&mut self) {
+        {
+            let status = &mut self.cpu.state.status;
+            Flag::Carry.set(status, true);
+            Flag::HalfCarry.set(status, false);
+            Flag::AddSubtract.set(status, false);
+        }
+        self.clock(4);
+    }
+
+    pub(crate) fn complement_carry_flag(&mut self) {
+        {
+            let previous = Flag::Carry.get(&self.cpu.state.status);
+            let status = &mut self.cpu.state.status;
+            Flag::Carry.set(status, !previous);
+            Flag::HalfCarry.set(status, previous);
+            Flag::AddSubtract.set(status, false);
+        }
         self.clock(4);
     }
 }
