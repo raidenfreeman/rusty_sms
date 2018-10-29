@@ -1,4 +1,5 @@
-mod arithmetic;
+mod arithmetic_16bit;
+mod arithmetic_8bit;
 mod bitwise;
 mod control;
 mod exchange;

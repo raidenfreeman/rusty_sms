@@ -95,24 +95,6 @@ impl Machine {
         self.clock(4);
     }
 
-    pub(crate) fn increment_register_wide(
-        &mut self,
-        target_first: fn(&mut Registers) -> &mut u8,
-        target_second: fn(&mut Registers) -> &mut u8,
-    ) {
-        let op1 = *target_first(&mut self.cpu.state.registers) as u16;
-        let op2 = *target_second(&mut self.cpu.state.registers) as u16;
-
-        let inc = ((op1 << 0x08) | op2) + 0x01;
-        let result_left = (inc >> 0x08) as u8;
-        let result_right = inc as u8;
-
-        *target_first(&mut self.cpu.state.registers) = result_left;
-        *target_second(&mut self.cpu.state.registers) = result_right;
-
-        self.clock(6);
-    }
-
     pub(crate) fn decrement_register(&mut self, target: fn(&mut Registers) -> &mut u8) {
         self.operate_on_register(
             Operation::Subtract,
@@ -127,24 +109,6 @@ impl Machine {
             ],
         );
         self.clock(4);
-    }
-
-    pub(crate) fn decrement_register_wide(
-        &mut self,
-        target_first: fn(&mut Registers) -> &mut u8,
-        target_second: fn(&mut Registers) -> &mut u8,
-    ) {
-        let op1 = *target_first(&mut self.cpu.state.registers) as u16;
-        let op2 = *target_second(&mut self.cpu.state.registers) as u16;
-
-        let inc = ((op1 << 0x08) | op2) - 0x01;
-        let result_left = (inc >> 0x08) as u8;
-        let result_right = inc as u8;
-
-        *target_first(&mut self.cpu.state.registers) = result_left;
-        *target_second(&mut self.cpu.state.registers) = result_right;
-
-        self.clock(6);
     }
 
     fn operate_on_register(
@@ -182,9 +146,9 @@ impl Machine {
             (Flag::AddSubtract, subtraction),
             (Flag::Carry, result16 > 0xFF),
         ]
-            .iter()
-            .cloned()
-            .collect();
+        .iter()
+        .cloned()
+        .collect();
 
         for flag in affected_flags {
             let status = &mut self.cpu.state.status;
@@ -193,26 +157,5 @@ impl Machine {
                 None => {}
             }
         }
-    }
-
-    pub(crate) fn set_carry_flag(&mut self) {
-        {
-            let status = &mut self.cpu.state.status;
-            Flag::Carry.set(status, true);
-            Flag::HalfCarry.set(status, false);
-            Flag::AddSubtract.set(status, false);
-        }
-        self.clock(4);
-    }
-
-    pub(crate) fn complement_carry_flag(&mut self) {
-        {
-            let previous = Flag::Carry.get(&self.cpu.state.status);
-            let status = &mut self.cpu.state.status;
-            Flag::Carry.set(status, !previous);
-            Flag::HalfCarry.set(status, previous);
-            Flag::AddSubtract.set(status, false);
-        }
-        self.clock(4);
     }
 }
