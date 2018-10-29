@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use vm::cpu::alu;
 use vm::cpu::flags::Flag;
 use vm::cpu::operation::Operation;
 use vm::cpu::registers::Registers;
@@ -118,33 +119,28 @@ impl Machine {
         operand: u8,
         affected_flags: Vec<Flag>,
     ) {
-        let op1 = *target(&mut self.cpu.state.registers) as u16;
-        let op2 = if operation == Operation::Add {
-            operand
-        } else {
-            !operand + 1
-        } as u16;
-        let result16 = op1 + op2;
-        let result8 = (result16 & 0xFF) as u8;
-        let result4 = (op1 & 0xF) + (op2 & 0xF);
-        *target(&mut self.cpu.state.registers) = result8;
+        let op1 = *target(&mut self.cpu.state.registers);
+        let op2 = operation.maybe_negate(operand);
+        let result = alu::add_bytes(op1, op2);
+
+        *target(&mut self.cpu.state.registers) = result.value;
 
         let subtraction = operation == Operation::Subtract;
         let overflow = if op1 < 0x80 && op2 < 0x80 {
-            result16 > 0x7F
+            result.value > 0x7F
         } else if op1 > 0x7F && op2 > 0x7F {
-            result16 < 0x80
+            result.value < 0x80
         } else {
             false
         };
 
         let default_values: HashMap<Flag, bool> = [
-            (Flag::Zero, result8 == 0x00),
-            (Flag::Sign, result8 > 0x7F),
-            (Flag::HalfCarry, result4 > 0xF),
+            (Flag::Zero, result.value == 0x00),
+            (Flag::Sign, result.value > 0x7F),
+            (Flag::HalfCarry, result.half_carry),
             (Flag::ParityOverflow, overflow),
             (Flag::AddSubtract, subtraction),
-            (Flag::Carry, result16 > 0xFF),
+            (Flag::Carry, result.carry),
         ]
         .iter()
         .cloned()
