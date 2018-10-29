@@ -35,10 +35,10 @@ pub(crate) fn negate<T: Add<Output = T> + Not<Output = T> + One>(value: T) -> T 
 
 pub(crate) fn add_bytes(a: u8, b: u8) -> AdderResult<u8> {
     let (low_nibble, half_carry) = Nibble::from_u8(a).overflowing_add(Nibble::from_u8(b));
-    let (high_nibble_temp, part_carry_a) =
-        Nibble::from_u8_high(a).overflowing_add(get_bit::<Nibble>(half_carry));
-    let (high_nibble, part_carry_b) = high_nibble_temp.overflowing_add(Nibble::from_u8_high(b));
-    let carry = part_carry_a | part_carry_b;
+    let (high_nibble_temp, carry_temp_1) =
+        Nibble::from_u8_high(a).overflowing_add(Nibble::from_u8_high(b));
+    let (high_nibble, carry_temp_2) = high_nibble_temp.overflowing_add(get_bit(half_carry));
+    let carry = carry_temp_1 | carry_temp_2;
     AdderResult {
         value: Nibble::u8_from_nibbles(high_nibble, low_nibble),
         half_carry: half_carry,
@@ -55,7 +55,11 @@ pub(crate) fn add_words(a: u16, b: u16) -> AdderResult<u16> {
     let high = {
         let (op1, _) = get_bytes(a);
         let (op2, _) = get_bytes(b);
-        add_bytes(op1 + get_bit::<u8>(low.carry), op2)
+        let result_temp = add_bytes(op1, op2);
+        let mut result = add_bytes(result_temp.value, get_bit(low.carry));
+        result.half_carry |= result_temp.half_carry;
+        result.carry |= result.carry;
+        result
     };
     AdderResult {
         value: get_word(high.value, low.value),
