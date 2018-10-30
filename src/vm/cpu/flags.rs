@@ -32,7 +32,20 @@ impl Flag {
         *register & mask
     }
 
-    pub(crate) fn set_values(status: &mut u8, affected: Vec<Flag>, values: &[(Flag, bool)]) {
+    pub fn all() -> [Flag; 8] {
+        [
+            Flag::Carry,
+            Flag::AddSubtract,
+            Flag::ParityOverflow,
+            Flag::HalfCarry,
+            Flag::Zero,
+            Flag::Sign,
+            Flag::Unused1,
+            Flag::Unused2,
+        ]
+    }
+
+    pub(crate) fn set_values(status: &mut u8, affected: &[Flag], values: &[(Flag, bool)]) {
         let map: HashMap<Flag, bool> = values.iter().cloned().collect();
         for flag in affected {
             match map.get(&flag) {

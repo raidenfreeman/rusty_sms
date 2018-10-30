@@ -11,7 +11,7 @@ impl Machine {
             Operation::Add,
             |regs| &mut regs.a,
             operand,
-            vec![
+            &[
                 Flag::AddSubtract,
                 Flag::Carry,
                 Flag::HalfCarry,
@@ -30,7 +30,7 @@ impl Machine {
             Operation::Add,
             |regs| &mut regs.a,
             operand + carry,
-            vec![
+            &[
                 Flag::AddSubtract,
                 Flag::Carry,
                 Flag::HalfCarry,
@@ -48,7 +48,7 @@ impl Machine {
             Operation::Subtract,
             |regs| &mut regs.a,
             operand,
-            vec![
+            &[
                 Flag::AddSubtract,
                 Flag::Carry,
                 Flag::HalfCarry,
@@ -67,7 +67,7 @@ impl Machine {
             Operation::Subtract,
             |regs| &mut regs.a,
             operand + carry,
-            vec![
+            &[
                 Flag::AddSubtract,
                 Flag::Carry,
                 Flag::HalfCarry,
@@ -84,7 +84,7 @@ impl Machine {
             Operation::Add,
             target,
             1,
-            vec![
+            &[
                 Flag::AddSubtract,
                 Flag::ParityOverflow,
                 Flag::HalfCarry,
@@ -100,7 +100,7 @@ impl Machine {
             Operation::Subtract,
             target,
             1,
-            vec![
+            &[
                 Flag::AddSubtract,
                 Flag::ParityOverflow,
                 Flag::HalfCarry,
@@ -116,20 +116,23 @@ impl Machine {
         operation: Operation,
         target: fn(&mut Registers) -> &mut u8,
         operand: u8,
-        affected_flags: Vec<Flag>,
+        affected_flags: &[Flag],
     ) {
         let op1 = *target(&mut self.cpu.state.registers);
         let op2 = operation.maybe_negate(operand);
         let result = alu::add_octets(op1, op2);
         *target(&mut self.cpu.state.registers) = result.value;
-        let flag_values = [
-            (Flag::Zero, result.value == 0x00),
-            (Flag::Sign, result.value > 0x7F),
-            (Flag::HalfCarry, result.half_carry),
-            (Flag::ParityOverflow, result.overflow),
-            (Flag::AddSubtract, operation == Operation::Subtract),
-            (Flag::Carry, result.carry),
-        ];
-        Flag::set_values(&mut self.cpu.state.status, affected_flags, &flag_values);
+        Flag::set_values(
+            &mut self.cpu.state.status,
+            affected_flags,
+            &[
+                (Flag::Zero, result.value == 0x00),
+                (Flag::Sign, result.value > 0x7F),
+                (Flag::HalfCarry, result.half_carry),
+                (Flag::ParityOverflow, result.overflow),
+                (Flag::AddSubtract, operation == Operation::Subtract),
+                (Flag::Carry, result.carry),
+            ],
+        );
     }
 }
