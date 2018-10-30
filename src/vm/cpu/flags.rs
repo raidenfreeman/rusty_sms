@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum Flag {
@@ -28,5 +30,15 @@ impl Flag {
     pub fn get_bit(self, register: &u8) -> u8 {
         let mask = self as u8;
         *register & mask
+    }
+
+    pub(crate) fn set_values(status: &mut u8, affected: Vec<Flag>, values: &[(Flag, bool)]) {
+        let map: HashMap<Flag, bool> = values.iter().cloned().collect();
+        for flag in affected {
+            match map.get(&flag) {
+                Some(value) => flag.set(status, *value),
+                None => {}
+            }
+        }
     }
 }

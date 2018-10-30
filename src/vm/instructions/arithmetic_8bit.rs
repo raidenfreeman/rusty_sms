@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use vm::cpu::alu;
 use vm::cpu::flags::Flag;
 use vm::cpu::operation::Operation;
@@ -121,37 +120,16 @@ impl Machine {
     ) {
         let op1 = *target(&mut self.cpu.state.registers);
         let op2 = operation.maybe_negate(operand);
-        let result = alu::add_bytes(op1, op2);
-
+        let result = alu::add_octets(op1, op2);
         *target(&mut self.cpu.state.registers) = result.value;
-
-        let subtraction = operation == Operation::Subtract;
-        let overflow = if op1 < 0x80 && op2 < 0x80 {
-            result.value > 0x7F
-        } else if op1 > 0x7F && op2 > 0x7F {
-            result.value < 0x80
-        } else {
-            false
-        };
-
-        let default_values: HashMap<Flag, bool> = [
+        let flag_values = [
             (Flag::Zero, result.value == 0x00),
             (Flag::Sign, result.value > 0x7F),
             (Flag::HalfCarry, result.half_carry),
-            (Flag::ParityOverflow, overflow),
-            (Flag::AddSubtract, subtraction),
+            (Flag::ParityOverflow, result.overflow),
+            (Flag::AddSubtract, operation == Operation::Subtract),
             (Flag::Carry, result.carry),
-        ]
-        .iter()
-        .cloned()
-        .collect();
-
-        for flag in affected_flags {
-            let status = &mut self.cpu.state.status;
-            match default_values.get(&flag) {
-                Some(value) => flag.set(status, *value),
-                None => {}
-            }
-        }
+        ];
+        Flag::set_values(&mut self.cpu.state.status, affected_flags, &flag_values);
     }
 }

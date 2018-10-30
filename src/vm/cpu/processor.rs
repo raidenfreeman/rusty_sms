@@ -1,3 +1,4 @@
+use vm::cpu::alu;
 use vm::cpu::registers::Registers;
 use vm::cpu::state::State;
 
@@ -30,5 +31,10 @@ impl Processor {
 
     pub fn get_register(&self, selector: fn(&Registers) -> u8) -> u8 {
         selector(&self.state.registers)
+    }
+
+    pub fn get_register_pair(&self, selector: fn(&Registers) -> (u8, u8)) -> u16 {
+        let (high, low) = selector(&self.state.registers);
+        alu::get_word(high, low)
     }
 }

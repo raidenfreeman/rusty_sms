@@ -12,7 +12,7 @@ use vm::instructions::opcodes::Opcode;
 use vm::machine::Machine;
 
 impl Machine {
-    pub(crate) fn execute(&mut self) {
+    pub fn execute(&mut self) {
         let opcode = Opcode::from(self.next_byte());
         match opcode {
             Opcode::Nop => self.nop(),
@@ -38,15 +38,15 @@ impl Machine {
             Opcode::DecH => self.decrement_register(|regs| &mut regs.h),
             Opcode::DecL => self.decrement_register(|regs| &mut regs.l),
 
-            Opcode::IncBC => self.increment_register_wide(|regs| &mut regs.b, |regs| &mut regs.c),
-            Opcode::IncDE => self.increment_register_wide(|regs| &mut regs.d, |regs| &mut regs.e),
-            Opcode::IncHL => self.increment_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
-            Opcode::IncSP => self.increment_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
+            Opcode::IncBC => self.increment_register_wide(|regs| (&mut regs.b, &mut regs.c)),
+            Opcode::IncDE => self.increment_register_wide(|regs| (&mut regs.d, &mut regs.e)),
+            Opcode::IncHL => self.increment_register_wide(|regs| (&mut regs.h, &mut regs.l)),
+            Opcode::IncSP => self.increment_register_wide(|regs| (&mut regs.s, &mut regs.p)),
 
-            Opcode::DecBC => self.decrement_register_wide(|regs| &mut regs.b, |regs| &mut regs.c),
-            Opcode::DecDE => self.decrement_register_wide(|regs| &mut regs.d, |regs| &mut regs.e),
-            Opcode::DecHL => self.decrement_register_wide(|regs| &mut regs.h, |regs| &mut regs.l),
-            Opcode::DecSP => self.decrement_register_wide(|regs| &mut regs.s, |regs| &mut regs.p),
+            Opcode::DecBC => self.decrement_register_wide(|regs| (&mut regs.b, &mut regs.c)),
+            Opcode::DecDE => self.decrement_register_wide(|regs| (&mut regs.d, &mut regs.e)),
+            Opcode::DecHL => self.decrement_register_wide(|regs| (&mut regs.h, &mut regs.l)),
+            Opcode::DecSP => self.decrement_register_wide(|regs| (&mut regs.s, &mut regs.p)),
 
             Opcode::AddA => self.add_register(|regs| regs.a),
             Opcode::AddB => self.add_register(|regs| regs.b),

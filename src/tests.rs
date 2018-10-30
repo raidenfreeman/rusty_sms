@@ -1,17 +1,24 @@
 #[cfg(test)]
 mod tests {
     use program::Program;
+    use vm::cpu::alu;
     use vm::cpu::flags::Flag;
     use vm::cpu::registers::Registers;
     use vm::instructions::opcodes::Opcode;
     use vm::machine::Machine;
 
-    fn run_program(regs: fn(&mut Registers), stream: Vec<Opcode>) -> Machine {
+    fn new_vm(regs: fn(&mut Registers), stream: Vec<Opcode>, start: u16) -> Machine {
         let mut vm = Machine::new();
         let mut p = Program::new();
         p.add_vector(stream.iter().map(|i| *i as u8).collect());
-        vm.load(&p);
+        vm.load_at(&p, start);
         regs(&mut vm.cpu.state.registers);
+        vm.cpu.goto(start);
+        vm
+    }
+
+    fn run_program(regs: fn(&mut Registers), stream: Vec<Opcode>) -> Machine {
+        let mut vm = new_vm(regs, stream, 0);
         vm.start();
         vm
     }
@@ -21,31 +28,59 @@ mod tests {
     }
 
     #[test]
+    fn nibbles() {
+        for iteration in 0..256 {
+            let i = iteration as u8;
+            let r = alu::add_octets(i, 1);
+            assert_eq!(i.wrapping_add(1), r.value, "At {}.", i);
+            assert_eq!(i == 0xFF, r.carry, "At {}.", i);
+            assert_eq!((i & 0x0F) == 0x0F, r.half_carry, "At {}.", i);
+            assert_eq!(i == 0x7F, r.overflow, "At {}.", i);
+        }
+    }
+
+    #[test]
+    fn words() {
+        for iteration in 0..65536 {
+            let i = iteration as u16;
+            let r = alu::add_words(i, 1);
+            assert_eq!(i.wrapping_add(1), r.value, "At {}.", i);
+            assert_eq!(i == 0xFFFF, r.carry, "At {}.", i);
+            assert_eq!((i & 0x0FFF) == 0x0FFF, r.half_carry, "At {}.", i);
+            assert_eq!(i == 0x7FFF, r.overflow, "At {}.", i);
+        }
+    }
+
+    #[test]
     fn increment() {
-        let mut vm = run_program(|regs| regs.a = 0x7E, vec![Opcode::IncA, Opcode::Halt]);
-        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x7F);
-        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
-        assert!(!Flag::Sign.get(&vm.cpu.state.status));
-        assert!(!Flag::Carry.get(&vm.cpu.state.status));
+        let range = || 0..256;
+        let mut vm = new_vm(|_| {}, range().map(|_| Opcode::IncA).collect(), 0);
+        for iteration in range() {
+            let i = iteration as u8;
+            let a = vm.cpu.get_register(|regs| regs.a);
+            let h = Flag::HalfCarry.get(&vm.cpu.state.status);
+            let s = Flag::Sign.get(&vm.cpu.state.status);
+            let ov = Flag::ParityOverflow.get(&vm.cpu.state.status);
+            assert_eq!(i, a);
+            assert_eq!(i >= 0x80, s, "At value {}.", i);
+            assert_eq!(i == 0x80, ov, "At value {}.", i);
+            if i > 0 {
+                assert_eq!(i & 0x0F == 0, h, "At value {}.", i);
+            }
+            vm.execute();
+        }
+    }
 
-        vm.start_at(0);
-        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x80);
-        assert!(Flag::ParityOverflow.get(&vm.cpu.state.status));
-        assert!(Flag::Sign.get(&vm.cpu.state.status));
-        assert!(!Flag::Carry.get(&vm.cpu.state.status));
-
-        vm.start_at(0);
-        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x81);
-        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
-        assert!(Flag::Sign.get(&vm.cpu.state.status));
-        assert!(!Flag::Carry.get(&vm.cpu.state.status));
-
-        vm.cpu.state.registers.a = 0xFF;
-        vm.start_at(0);
-        assert_eq!(vm.cpu.get_register(|regs| regs.a), 0x00);
-        assert!(!Flag::ParityOverflow.get(&vm.cpu.state.status));
-        assert!(!Flag::Sign.get(&vm.cpu.state.status));
-        assert!(!Flag::Carry.get(&vm.cpu.state.status));
+    #[test]
+    fn increment_pair() {
+        let range = || 0..65536;
+        let mut vm = new_vm(|_| {}, range().map(|_| Opcode::IncBC).collect(), 0);
+        for iteration in range() {
+            let i = iteration as u16;
+            let bc = vm.cpu.get_register_pair(|regs| (regs.b, regs.c));
+            assert_eq!(i, bc);
+            vm.execute();
+        }
     }
 
     #[test]

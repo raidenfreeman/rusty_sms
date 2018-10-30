@@ -15,15 +15,20 @@ impl Machine {
         }
     }
 
-    pub fn load_at(&mut self, program: &Program, start_address: u16) {
+    pub fn load_at(&mut self, program: &Program, start_address: u16) -> bool {
+        let end = start_address as u32 + program.raw().len() as u32;
+        let will_fit = end <= 65536;
         let mut address = start_address;
-        for value in program.raw() {
-            self.ram.write_u8(address, *value);
-            address += 1;
+        if will_fit {
+            for value in program.raw() {
+                self.ram.write_u8(address, *value);
+                address = address.wrapping_add(1);
+            }
         }
+        will_fit
     }
 
-    pub fn load(&mut self, program: &Program) {
+    pub fn load(&mut self, program: &Program) -> bool {
         self.load_at(program, 0)
     }
 

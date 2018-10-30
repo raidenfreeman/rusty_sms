@@ -1,58 +1,60 @@
+use vm::cpu::alu;
 use vm::cpu::flags::Flag;
+use vm::cpu::operation::Operation;
 use vm::cpu::registers::Registers;
 use vm::machine::Machine;
 
 impl Machine {
     pub(crate) fn increment_register_wide(
         &mut self,
-        target_first: fn(&mut Registers) -> &mut u8,
-        target_second: fn(&mut Registers) -> &mut u8,
+        target: fn(&mut Registers) -> (&mut u8, &mut u8),
     ) {
-        let op1 = *target_first(&mut self.cpu.state.registers) as u16;
-        let op2 = *target_second(&mut self.cpu.state.registers) as u16;
-
-        let inc = ((op1 << 0x08) | op2) + 0x01;
-        let result_left = (inc >> 0x08) as u8;
-        let result_right = inc as u8;
-
-        *target_first(&mut self.cpu.state.registers) = result_left;
-        *target_second(&mut self.cpu.state.registers) = result_right;
-
+        self.operate_on_register_pair(Operation::Add, target, (0, 1), vec![]);
         self.clock(6);
     }
 
     pub(crate) fn decrement_register_wide(
         &mut self,
-        target_first: fn(&mut Registers) -> &mut u8,
-        target_second: fn(&mut Registers) -> &mut u8,
+        target: fn(&mut Registers) -> (&mut u8, &mut u8),
     ) {
-        let op1 = *target_first(&mut self.cpu.state.registers) as u16;
-        let op2 = *target_second(&mut self.cpu.state.registers) as u16;
-
-        let inc = ((op1 << 0x08) | op2) - 0x01;
-        let result_left = (inc >> 0x08) as u8;
-        let result_right = inc as u8;
-
-        *target_first(&mut self.cpu.state.registers) = result_left;
-        *target_second(&mut self.cpu.state.registers) = result_right;
-
+        self.operate_on_register_pair(Operation::Subtract, target, (0, 1), vec![]);
         self.clock(6);
     }
 
-    fn operate_on_register_pair(&mut self, selector: fn(&Registers) -> (u8, u8)) {
-        let op1 = {
-            let high = self.cpu.state.registers.h;
-            let low = self.cpu.state.registers.l;
-            Registers::u8s_to_u16(high, low)
-        };
-        let op2 = {
-            let (high, low) = selector(&self.cpu.state.registers);
-            Registers::u8s_to_u16(high, low)
-        };
-        let result = (op1 as u32) + (op2 as u32);
-        let carry = (result & 0x10000) != 0;
-        Flag::AddSubtract.set(&mut self.cpu.state.status, false);
-        Flag::Carry.set(&mut self.cpu.state.status, carry);
+    pub(crate) fn add_register_pair(
+        &mut self,
+        target: fn(&mut Registers) -> (&mut u8, &mut u8),
+        selector: fn(&Registers) -> (u8, u8),
+    ) {
+        let operand = selector(&self.cpu.state.registers);
+        self.operate_on_register_pair(
+            Operation::Add,
+            target,
+            operand,
+            vec![Flag::Carry, Flag::HalfCarry, Flag::AddSubtract],
+        );
         self.clock(11);
+    }
+
+    fn operate_on_register_pair(
+        &mut self,
+        operation: Operation,
+        target: fn(&mut Registers) -> (&mut u8, &mut u8),
+        operand: (u8, u8),
+        affected_flags: Vec<Flag>,
+    ) {
+        let op1 = self.cpu.state.registers.get_word(target);
+        let op2 = operation.maybe_negate(alu::get_word_from_tuple(operand));
+        let result = alu::add_words(op1, op2);
+        self.cpu.state.registers.assign_word(target, result.value);
+        let flag_values = [
+            (Flag::Zero, result.value == 0x0000),
+            (Flag::Sign, result.value > 0x7FFF),
+            (Flag::HalfCarry, result.half_carry),
+            (Flag::ParityOverflow, result.overflow),
+            (Flag::AddSubtract, operation == Operation::Subtract),
+            (Flag::Carry, result.carry),
+        ];
+        Flag::set_values(&mut self.cpu.state.status, affected_flags, &flag_values);
     }
 }

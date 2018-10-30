@@ -1,3 +1,5 @@
+use vm::cpu::alu;
+
 pub struct Registers {
     pub a: u8,
     pub b: u8,
@@ -35,5 +37,28 @@ impl Registers {
         let low = value as u8;
         let high = (value >> 8) as u8;
         (high, low)
+    }
+
+    pub(crate) fn assign_bytes(
+        &mut self,
+        target: fn(&mut Registers) -> (&mut u8, &mut u8),
+        value: (u8, u8),
+    ) {
+        let reg = target(self);
+        *reg.0 = value.0;
+        *reg.1 = value.1;
+    }
+
+    pub(crate) fn assign_word(
+        &mut self,
+        target: fn(&mut Registers) -> (&mut u8, &mut u8),
+        value: u16,
+    ) {
+        self.assign_bytes(target, alu::get_octets(value));
+    }
+
+    pub(crate) fn get_word(&mut self, target: fn(&mut Registers) -> (&mut u8, &mut u8)) -> u16 {
+        let (high, low) = target(self);
+        alu::get_word(*high, *low)
     }
 }

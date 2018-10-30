@@ -25,10 +25,8 @@ impl Nibble {
 
     pub fn overflowing_add(self, rhs: Nibble) -> (Nibble, bool) {
         let ext_result = self.value + rhs.value;
-        let result = Nibble {
-            value: ext_result & 0x0F,
-        };
-        let overflow = ext_result > 0x0F;
+        let result = Nibble::from_u8(ext_result);
+        let overflow = Nibble::from_u8_high(ext_result).value != 0;
         (result, overflow)
     }
 }
