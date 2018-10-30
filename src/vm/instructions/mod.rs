@@ -64,6 +64,11 @@ impl Machine {
             Opcode::SubH => self.subtract_register(|regs| regs.h),
             Opcode::SubL => self.subtract_register(|regs| regs.l),
 
+            Opcode::AddHLBC => self.add_register_pair_to_hl(|regs| (regs.b, regs.c)),
+            Opcode::AddHLDE => self.add_register_pair_to_hl(|regs| (regs.d, regs.e)),
+            Opcode::AddHLHL => self.add_register_pair_to_hl(|regs| (regs.h, regs.l)),
+            Opcode::AddHLSP => self.add_register_pair_to_hl(|regs| (regs.s, regs.p)),
+
             Opcode::AdcA => self.add_carry_register(|regs| regs.a),
             Opcode::AdcB => self.add_carry_register(|regs| regs.b),
             Opcode::AdcC => self.add_carry_register(|regs| regs.c),

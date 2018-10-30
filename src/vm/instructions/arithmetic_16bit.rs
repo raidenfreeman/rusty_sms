@@ -21,7 +21,11 @@ impl Machine {
         self.clock(6);
     }
 
-    pub(crate) fn add_register_pair(
+    pub(crate) fn add_register_pair_to_hl(&mut self, selector: fn(&Registers) -> (u8, u8)) {
+        self.add_register_pair(|regs| (&mut regs.h, &mut regs.l), selector);
+    }
+
+    fn add_register_pair(
         &mut self,
         target: fn(&mut Registers) -> (&mut u8, &mut u8),
         selector: fn(&Registers) -> (u8, u8),
